@@ -22,14 +22,16 @@ const icons = [homeIcon, coursesIcon, codeIcon, commandIcon, simulatorIcon, chat
 .sidebar {
   width: 70px;
   height: 100vh;
-  background: #8D06C375;
+  background: #8D06C3;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 15px 0;
+  padding-top: 6px;
+  /* padding: 15px 0; */
   position: fixed;
   top: 0;
   left: 0;
+  z-index: 1;
 }
 
 /* 📌 Кнопки */
