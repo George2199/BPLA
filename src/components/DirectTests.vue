@@ -61,20 +61,18 @@
   const textAnswer = ref('');
   </script>
 
-<style>
+<style scoped>
 /* убрала scoped */
 .kunt {
   background: #ffffff;
   max-height: 75vh;
   overflow-y: auto;
   padding-right: 5px;
-
-  scrollbar-width:thin;
-  scrollbar-color: #8800cc #f0f0f0;
 }
 
 /* скроллбар — ширина 20px */
 .kunt::-webkit-scrollbar {
+  overflow-y: visible;
   width: 20px;
 }
 
@@ -91,6 +89,9 @@
   background-color: #aa33ff;
 }
 
+.kunt::-webkit-scrollbar-thumb:hover {
+  background-color: #aa33ff; /* ← Цвет при наведении */
+}
 
 .test-card {
   font-family: 'Unbounded', sans-serif;
@@ -100,7 +101,6 @@
   padding: 20px;
   width: 360px;
   max-height: 90vh;
-  overflow-y: hidden;
 }
 
 h2 {
@@ -110,18 +110,18 @@ h2 {
   margin-bottom: 15px;
 }
 
-.question-block{   
+/* .question-block{   
   font-family: 'Unbounded', sans-serif;
   font-weight:700 !important;
   margin-bottom: 20px;
   color: black;
   padding: 10px;
   border-radius: 8px;
-}
+} */
 
-.option {
+/* .option {
   display: flex;
-  align-items: flex-start; /* ← чтобы Тата была сверху */
+  align-items: flex-start; 
   gap: 10px;
   font-size: 15px;
   font-weight: 300;
@@ -139,13 +139,13 @@ input[type="checkbox"] {
   cursor: pointer;
   position: relative;
   flex-shrink: 0;
-  margin-top: 2px; /* ← немного опустить, чтобы ровно совпало с первой строкой */
+  margin-top: 2px; 
 }
 
 
 input[type="checkbox"]:checked {
-  background-color: #8800cc; /* ← вот тут можно менять цвет внутри кружка */
-}
+  background-color: #8800cc;
+} */
 
 
 
@@ -163,22 +163,14 @@ input[type="checkbox"]:checked {
   border-color: #aa33ff;
   box-shadow: 0 0 0 2px rgba(136, 0, 204, 0.2);
 }
-/*   
-  .text-input {
-    width: 100%;
-    padding: 6px;
-    font-size: 14px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-  } */
-
+/* 
   .question-block strong {
   font-weight: 700;
   }
 
   label {
     font-weight: 300;
-  }
+  } */
 
   </style>
   
