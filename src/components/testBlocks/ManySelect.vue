@@ -9,6 +9,7 @@
           '--bg': background_color,
           '--border': border_color,
           '--text': text_color,
+          '--kruglik': kruglik_size,
           }"
       >
         <input
@@ -39,6 +40,10 @@
     text_color: {
       type: String,
       default: '#000000'
+    },
+    kruglik_size: {
+      type: String,
+      default: '16px'
     },
   })
   
@@ -86,8 +91,8 @@ label {
 
 input[type="checkbox"] {
   appearance: none;
-  width: 16px;
-  height: 16px;
+  width: var(--kruglik);
+  height: var(--kruglik);
   border: 2px solid var(--border);
   border-radius: 50%;
   background-color: var(--bg);

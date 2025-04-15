@@ -3,8 +3,11 @@
         '--bg': background_color,
         '--border': border_color,
         '--text': text_color,
+        '--kruglik': kruglik_size,
         }">
      
+     <button class="close-button" @click="visible = false">×</button>
+
         <h2>Тест: Контроллер и полёт</h2>
         <div class="kunt">
         <ManySelect
@@ -16,6 +19,7 @@
             :background_color=background_color
             :border_color=border_color
             :text_color=text_color
+            :kruglik_size=kruglik_size
         />
         </div>
     </div>
@@ -27,6 +31,8 @@
   const background_color = "#ffffff"
   const border_color = "#8800cc"
   const text_color = "#000000"
+
+const kruglik_size = "16px"
   const questions = ref([
     {
       question: 'Что такое БВС?',
@@ -90,14 +96,18 @@
   
 <style>
 
-.test-card {
-  font-family: 'Unbounded', sans-serif;
-  background: var(--border);
-  color: var(--bg);
-  border-radius: 12px;
-  padding: 20px;
-  width: 360px;
-  max-height: 90vh;
+.close-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #ff3333;
+  color: transparent;
+  cursor: pointer;
+  appearance: none;
+  width: var(--kruglik);
+  height: var(--kruglik);
+  border: 1px solid var(--bg);
+  border-radius: 50%;
 }
 
 .kunt {
@@ -128,13 +138,14 @@
 }
 
 .test-card {
+  position: relative;
   font-family: 'Unbounded', sans-serif;
   background: var(--border);
   color: var(--bg);
   border-radius: 12px;
   padding: 20px;
-  width: 360px;
-  max-height: 90vh;
+  /* width: 100%;  */
+  /* max-height: 90vh; */
 }
 
 h2 {
