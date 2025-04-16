@@ -16,7 +16,13 @@ const routes = [
     component: () => import('@/views/Tasks.vue'),
     name: 'tasks',
     meta: { requiresAuth: false }
-  }
+  },
+  {
+    path: '/courses/:id',
+    name: 'course',
+    component: () => import('@/views/Tasks.vue')  // или твой компонент
+  },
+ 
   
 ]
 

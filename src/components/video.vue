@@ -9,7 +9,7 @@
         @ended="onVideoEnd"
         @timeupdate="updateProgress"
       >
-        <source src="@/components/pics/Видео.mp4" type="video/mp4">
+      <source :src="videoUrl" type="video/mp4">
       </video>
       <div class="controls">
         <button @click="togglePlay">{{ isPlaying ? 'Пауза' : 'Играть' }}</button>
@@ -78,7 +78,12 @@
 
   const formattedTime = computed(() => formatTime(currentTime.value));
   const formattedDuration = computed(() => formatTime(duration.value));
-
+  let videoUrl = ''
+  try {
+    videoUrl = new URL('@/components/pics/Видео.mp4', import.meta.url).href
+  } catch (e) {
+    console.warn('⚠️ Видео не найдено, будет пустой src')
+  }
   </script>
 
 <style scoped>

@@ -5,11 +5,10 @@
 
     <!-- Основной контент -->
     <div class="main-content">
-      <h1 class="course-title">Курс 1: Управление БПЛА</h1>
+      <h1 class="course-title">{{ course?.title || 'Загрузка...' }}</h1>
       <div class="content-wrapper">
         <!-- Меню курса -->
-        <CourseMenu />
-
+        <CourseMenu :themes="course?.themes || []" />
         <!-- Контентная область -->
         <div class="content-box">
           <Video />
@@ -20,9 +19,27 @@
 </template>
 
 <script setup>
-import Sidebar from '@/components/Sidebar.vue';
-import CourseMenu from '@/components/CourseMenu.vue';
-import Video from '@/components/video.vue';
+import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import axios from 'axios'
+
+import Sidebar from '@/components/Sidebar.vue'
+import CourseMenu from '@/components/CourseMenu.vue'
+import Video from '@/components/video.vue'
+
+const route = useRoute()
+const courseId = route.params.id
+
+const course = ref(null)
+
+onMounted(async () => {
+  try {
+    const res = await axios.get(`http://localhost:5000/courses/${courseId}`)
+    course.value = res.data
+  } catch (err) {
+    console.error('❌ Ошибка при загрузке курса:', err)
+  }
+})
 </script>
 
 <style>

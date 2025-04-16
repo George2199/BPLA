@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_migrate import Migrate
-from models import db, Role
+from models import db, Role, Course, Theme, Task
 from config import Config
 
 app = Flask(__name__)
@@ -38,6 +38,76 @@ def login():
         return jsonify({"success": True, "message": "Login successful"})
     else:
         return jsonify({"success": False, "message": "Invalid credentials"}), 401
+    
+@app.route('/courses', methods=['GET'])
+def get_courses():
+    courses = Course.query.all()
+    return jsonify([
+        {
+            "id": c.id,
+            "title": c.title,
+            "image_url": c.image_url,
+            "progress": c.progress,
+            "themes": [
+                {
+                    "id": t.id,
+                    "title": t.title,
+                    "tasks": [
+                        {
+                            "id": task.id,
+                            "title": task.title,
+                            "type": task.type
+                        } for task in t.tasks
+                    ]
+                } for t in c.themes
+            ]
+        } for c in courses
+    ])
+
+@app.route('/courses/<int:id>', methods=['GET'])
+def get_course_by_id(id):
+    course = Course.query.get(id)
+    if not course:
+        return jsonify({'error': 'Курс не найден'}), 404
+
+    return jsonify({
+        "id": course.id,
+        "title": course.title,
+        "image_url": course.image_url,
+        "progress": course.progress,
+        "themes": [
+            {
+                "id": t.id,
+                "title": t.title,
+                "tasks": [
+                    {
+                        "id": task.id,
+                        "title": task.title,
+                        "type": task.type
+                    } for task in t.tasks
+                ]
+            } for t in course.themes
+        ]
+    })
+
+
+@app.route('/themes', methods=['GET'])
+def get_themes():
+    themes = Theme.query.all()
+    return jsonify([
+        {
+            "id": t.id,
+            "title": t.title,
+            "tasks": [
+                {
+                    "id": task.id,
+                    "title": task.title,
+                    "type": task.type
+                } for task in t.tasks
+            ]
+        } for t in themes
+    ])
+
 
 if __name__ == '__main__':
     app.run(debug=True)
