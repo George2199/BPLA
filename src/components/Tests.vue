@@ -4,7 +4,7 @@
         '--border': border_color,
         '--text': text_color,
         }">
-     
+      <button class="close-button" @click="visible = false">×</button>
         <h2>Тест: Контроллер и полёт</h2>
         <div class="kunt">
         <ManySelect
@@ -158,4 +158,17 @@ h2 {
   box-shadow: 0 0 0 2px rgba(136, 0, 204, 0.2);
 }
 
+.close-button {
+  align-content: right;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  color: var(--bg);
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  font-weight: bold;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
 </style>

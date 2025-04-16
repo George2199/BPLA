@@ -70,10 +70,8 @@
   padding-right: 5px;
 }
 
-/* скроллбар — ширина 20px */
 .kunt::-webkit-scrollbar {
   overflow-y: visible;
-  width: 20px;
 }
 
 .kunt::-webkit-scrollbar-track {
@@ -110,45 +108,6 @@ h2 {
   margin-bottom: 15px;
 }
 
-/* .question-block{   
-  font-family: 'Unbounded', sans-serif;
-  font-weight:700 !important;
-  margin-bottom: 20px;
-  color: black;
-  padding: 10px;
-  border-radius: 8px;
-} */
-
-/* .option {
-  display: flex;
-  align-items: flex-start; 
-  gap: 10px;
-  font-size: 15px;
-  font-weight: 300;
-  margin: 8px 0;
-  line-height: 1.4;
-}
-  
-input[type="checkbox"] {
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  border: 2px solid #8800cc;
-  border-radius: 50%;
-  background-color: #fff;
-  cursor: pointer;
-  position: relative;
-  flex-shrink: 0;
-  margin-top: 2px; 
-}
-
-
-input[type="checkbox"]:checked {
-  background-color: #8800cc;
-} */
-
-
-
 .text-input {
   margin-top: 10px;
   width: 100%;
@@ -163,14 +122,6 @@ input[type="checkbox"]:checked {
   border-color: #aa33ff;
   box-shadow: 0 0 0 2px rgba(136, 0, 204, 0.2);
 }
-/* 
-  .question-block strong {
-  font-weight: 700;
-  }
-
-  label {
-    font-weight: 300;
-  } */
 
   </style>
   

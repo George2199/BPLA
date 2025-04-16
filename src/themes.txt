@@ -1,0 +1,5 @@
+Dark orange:
+
+const background_color = "#342e29"
+const border_color = "#ef6802"
+const text_color = "#bfbbb7"
