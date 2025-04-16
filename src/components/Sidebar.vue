@@ -1,6 +1,21 @@
 <template>
   <div class="sidebar">
-    <button v-for="(icon, index) in icons" :key="index" class="sidebar-button">
+    <!-- Кнопка "меню" (первая иконка) — просто кнопка -->
+    <button class="sidebar-button">
+      <img :src="icons[0]" alt="Меню" class="sidebar-icon" />
+    </button>
+
+    <!-- Книга — router-link -->
+    <router-link to="/courses" class="sidebar-button">
+      <img :src="icons[1]" alt="Курсы" class="sidebar-icon" />
+    </router-link>
+
+    <!-- Остальные кнопки -->
+    <button
+      v-for="(icon, index) in icons.slice(2)"
+      :key="index"
+      class="sidebar-button"
+    >
       <img :src="icon" alt="Icon" class="sidebar-icon" />
     </button>
   </div>
@@ -17,6 +32,7 @@ import chatIcon from '@/assets/icons/chat.png';
 const icons = [homeIcon, coursesIcon, codeIcon, commandIcon, simulatorIcon, chatIcon];
 </script>
 
+
 <style>
 /* 📌 Sidebar */
 .sidebar {
@@ -32,8 +48,9 @@ const icons = [homeIcon, coursesIcon, codeIcon, commandIcon, simulatorIcon, chat
   left: 0;
 }
 
-/* 📌 Кнопки */
-.sidebar-button {
+.sidebar-button,
+.sidebar-button:link,
+.sidebar-button:visited {
   background: none;
   border: none;
   cursor: pointer;
@@ -41,9 +58,10 @@ const icons = [homeIcon, coursesIcon, codeIcon, commandIcon, simulatorIcon, chat
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 50px; /* ✅ Фиксируем размер кнопки */
+  width: 50px;
   height: 50px;
 }
+
 
 /* 📌 Иконки */
 .sidebar-icon {

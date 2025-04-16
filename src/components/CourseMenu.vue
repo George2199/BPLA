@@ -1,35 +1,44 @@
 <template>
   <div class="course-menu">
-    <div v-for="(topic, index) in topics" :key="index">
+    <div v-for="(theme, index) in themes" :key="theme.id">
       <button @click="toggleTopic(index)" class="topic-button">
-        {{ topic.title }}
-        <span>{{ openTopic === index ? '▲' : '▼' }}</span>
+        {{ theme.title }}
+        <span>{{ openedTopics.includes(index) ? '▲' : '▼' }}</span>
       </button>
-      <div v-if="openTopic === index" class="lessons-list">
-        <button v-for="(lesson, i) in topic.lessons" :key="i" class="lesson-button">
-          {{ lesson }}
+      <div v-if="openedTopics.includes(index)" class="lessons-list">
+        <button
+          v-for="task in theme.tasks"
+          :key="task.id"
+          class="lesson-button"
+        >
+          {{ task.title }} ({{ task.type }})
         </button>
       </div>
     </div>
   </div>
 </template>
 
+
 <script setup>
-import { ref } from 'vue';
+import { ref } from 'vue'
 
-const openTopic = ref(null);
+defineProps({
+  themes: {
+    type: Array,
+    default: () => []
+  }
+})
 
-const topics = ref([
-  { title: 'Тема 1: Полёт и контроллер', lessons: [] },
-  { title: 'Тема 2: Полёт и контроллер', lessons: ['Видеоурок 1: Контроллер', 'Видеоурок 2: Полёт', 'Тест 1: Контроллер и полёт', 'Задание 1: Контроллер'] },
-  { title: 'Тема 3: Полёт и контроллер', lessons: [] },
-  { title: 'Тема 4: Полёт и контроллер', lessons: [] },
-  { title: 'Тема 5: Полёт и контроллер', lessons: [] }
-]);
+const openedTopics = ref([])
 
 const toggleTopic = (index) => {
-  openTopic.value = openTopic.value === index ? null : index;
-};
+  const idx = openedTopics.value.indexOf(index)
+  if (idx === -1) {
+    openedTopics.value.push(index)
+  } else {
+    openedTopics.value.splice(idx, 1)
+  }
+}
 </script>
 
 <style>
