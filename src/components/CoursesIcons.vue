@@ -1,27 +1,34 @@
 <template>
- <div class="container">
-  <router-link :to="{ name: 'tasks' }" class="card">
-    <img class="card-image" :src="pythonImg" alt="Python">
-    <div class="card-text">Python. Введение</div>
-  </router-link>
-
-  <div class="card">
-    <img class="card-image" :src="cosmosImg" alt="Cosmos">
-    <div class="card-text">Аэрокосмос</div>
+  <div class="container">
+    <router-link
+      v-for="course in courses"
+      :key="course.id"
+      class="card"
+      :to="`/courses/${course.id}`
+    "
+    >
+      <img class="card-image" :src="course.image_url" :alt="course.title" />
+      <div class="card-text">{{ course.title }}</div>
+    </router-link>
   </div>
-
-  <div class="card">
-    <img class="card-image" :src="dronImg" alt="Dron">
-    <div class="card-text">Управление БПЛА</div>
-  </div>
- </div>
 </template>
 
 <script setup>
-import pythonImg from '@/components/pics/Питон.png';
-import cosmosImg from '@/components/pics/Космос.png';
-import dronImg from '@/components/pics/Дрон.png';
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
+
+const courses = ref([])
+
+onMounted(async () => {
+  try {
+    const res = await axios.get('http://localhost:5000/courses')
+    courses.value = res.data
+  } catch (e) {
+    console.error('❌ Не удалось загрузить курсы:', e)
+  }
+})
 </script>
+
 
 <style>
 .container {
