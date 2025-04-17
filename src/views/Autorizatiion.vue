@@ -1,25 +1,26 @@
 <template>
-   <GradientBar />
+  <GradientBar />
   <div class="app-container">
-    <div class="main-content">
-            <h1>Авторизация</h1>  
-            <form @submit.prevent="handleSubmit">
-              <div class="form-group">
-                <label for="login">Логин</label>
-                <input type="text" placeholder="Логин" id="login" v-model="login" required />
-              </div>
-              <div class="form-group">
-                <label for="password">Пароль</label>
-                <input type="password" placeholder="Пароль" id="password" v-model="password" required />
-              </div>
-              <button type="submit">Далее</button>
-            </form>
+    <div class="left-panel">
+      Аэрокосмос
+    </div>
+    <div class="right-panel">
+      <h1>Авторизация</h1>
+      <form @submit.prevent="handleSubmit">
+        <div class="form-group">
+          <label for="login">Логин</label>
+          <input type="text" placeholder="Логин" id="login" v-model="login" required />
         </div>
-      </div>
-      
- 
-
+        <div class="form-group">
+          <label for="password">Пароль</label>
+          <input type="password" placeholder="Пароль" id="password" v-model="password" required />
+        </div>
+        <button type="submit">Далее</button>
+      </form>
+    </div>
+  </div>
 </template>
+
 
 <script setup>
 import { toDisplayString } from 'vue';
@@ -146,12 +147,29 @@ html, body {
 /* 🔹 Главный контейнер */
 .app-container {
   display: flex;
+  height: 100vh;
+  width: 100%;
+}
+
+/* Левая часть с логотипом или градиентом */
+.left-panel {
+  flex: 1;
+  background: linear-gradient(to bottom, #0d001a, #5c1a83);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  font-weight: bold;
+}
+
+/* Правая часть с формой */
+.right-panel {
   width: 500px;
-  height: 600px;
-  margin-left: 940px;
-  margin-top: 50px;
   background: #ffffff;
-  color: rgb(0, 0, 0);
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
 }
 
 #app {

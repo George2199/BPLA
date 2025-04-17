@@ -5,11 +5,13 @@
         {{ theme.title }}
         <span>{{ openedTopics.includes(index) ? '▲' : '▼' }}</span>
       </button>
+
       <div v-if="openedTopics.includes(index)" class="lessons-list">
         <button
           v-for="task in theme.tasks"
           :key="task.id"
           class="lesson-button"
+          @click="selectTask(task)"
         >
           {{ task.title }} ({{ task.type }})
         </button>
@@ -17,7 +19,6 @@
     </div>
   </div>
 </template>
-
 
 <script setup>
 import { ref } from 'vue'
@@ -29,6 +30,8 @@ defineProps({
   }
 })
 
+const emit = defineEmits(['select-task'])
+
 const openedTopics = ref([])
 
 const toggleTopic = (index) => {
@@ -39,7 +42,12 @@ const toggleTopic = (index) => {
     openedTopics.value.splice(idx, 1)
   }
 }
+
+const selectTask = (task) => {
+  emit('select-task', task)
+}
 </script>
+
 
 <style>
 /* Контейнер меню */
