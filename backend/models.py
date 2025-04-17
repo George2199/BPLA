@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.dialects.postgresql import JSON
 
 db = SQLAlchemy()
 
@@ -30,9 +31,8 @@ class Theme(db.Model):
     tasks = db.relationship('Task', backref='theme', lazy=True, cascade='all, delete-orphan')
 
 class Task(db.Model):
-    __tablename__ = 'tasks'
-
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(200), nullable=False)
-    type = db.Column(db.String(50), nullable=False)
-    theme_id = db.Column(db.Integer, db.ForeignKey('themes.id'), nullable=False)
+    title = db.Column(db.String)
+    type = db.Column(db.String)  # video, test, etc.
+    content = db.Column(JSON, nullable=True)  # вот это и есть "данные" задачи
+    theme_id = db.Column(db.Integer, db.ForeignKey('themes.id'))

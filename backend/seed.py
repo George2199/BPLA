@@ -1,5 +1,22 @@
 from models import db, Role, Theme, Task, Course
 from app import app
+import json
+
+IMG_PATH = "/data/imgs/"
+VIDEO_PATH = "/data/videos/"
+
+def clear_tables():
+    with app.app_context():
+        print("⚠️ Удаление всех данных из таблиц...")
+
+        # Удаляем сначала зависимые (Task → Theme → Course)
+        Task.query.delete()
+        Theme.query.delete()
+        Course.query.delete()
+        Role.query.delete()
+
+        db.session.commit()
+        print("✅ Все данные удалены.")
 
 def seed_roles():
     with app.app_context():
@@ -22,22 +39,22 @@ def seed_courses():
         if Course.query.first():
             print("🔍 Courses already seeded.")
             return
-
+        
         python_course = Course(
             title="Python. Введение",
-            image_url="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg",
+            image_url=IMG_PATH+"Python.png",
             progress=0.3
         )
 
         cosmos_course = Course(
             title="Аэрокосмос",
-            image_url="https://cdn.pixabay.com/photo/2011/12/14/12/11/rocket-launch-11049_960_720.jpg",
+            image_url=IMG_PATH+"Cosmos.png",
             progress=0.0
         )
 
         drone_course = Course(
             title="Управление БПЛА",
-            image_url="https://cdn.pixabay.com/photo/2016/11/29/09/15/drone-1866742_960_720.jpg",
+            image_url=IMG_PATH+"Drone.png",
             progress=0.7
         )
 
@@ -48,8 +65,33 @@ def seed_courses():
                 Task(title="Практика: Примитивы", type="practical")
             ]),
             Theme(title="Тема 2: Условия", tasks=[
-                Task(title="Видео: if/else", type="video"),
-                Task(title="Тест: Условия", type="test")
+Task(title="Видео: if/else", type="video", content=VIDEO_PATH + "narezka_1920x1080.mp4"),
+                Task(
+                    title="Тест 1: Контроллер и полёт",
+                    type="test",
+                    content=json.dumps({
+                        "questions": [
+                            {
+                                "question": "Что такое БВС?",
+                                "options": [
+                                    "Беспилотное воздушное средство",
+                                    "Беспилотное водное средство",
+                                    "Беспилотное ветряное средство",
+                                    "Беспилотное вкусное средство"
+                                ]
+                            },
+                            {
+                                "question": "Где нельзя запускать БВС?",
+                                "options": [
+                                    "Над военными объектами",
+                                    "Вблизи аэропортов",
+                                    "В закрытых помещениях",
+                                    "На Юпитере"
+                                ]
+                            }
+                        ]
+                    })
+                ),
             ])
         ]
 
@@ -60,5 +102,6 @@ def seed_courses():
 
 
 if __name__ == "__main__":
+    clear_tables()
     seed_roles()
     seed_courses()
