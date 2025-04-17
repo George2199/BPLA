@@ -4,10 +4,13 @@
       v-for="course in courses"
       :key="course.id"
       class="card"
-      :to="`/courses/${course.id}`
-    "
+      :to="`/courses/${course.id}`"
     >
-      <img class="card-image" :src="course.image_url" :alt="course.title" />
+    <img
+      class="card-image"
+      :src="`${API_URL}${course.image_url}`"
+      :alt="course.title"
+    />
       <div class="card-text">{{ course.title }}</div>
     </router-link>
   </div>
@@ -17,11 +20,12 @@
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 
+const API_URL = import.meta.env.VITE_API_URL
 const courses = ref([])
 
 onMounted(async () => {
   try {
-    const res = await axios.get('http://localhost:5000/courses')
+    const res = await axios.get(`${API_URL}/courses`)
     courses.value = res.data
   } catch (e) {
     console.error('❌ Не удалось загрузить курсы:', e)

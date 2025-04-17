@@ -8,15 +8,24 @@
       <h1 class="course-title">{{ course?.title || 'Загрузка...' }}</h1>
       <div class="content-wrapper">
         <!-- Меню курса -->
-        <CourseMenu :themes="course?.themes || []" />
+        <CourseMenu
+          :themes="course?.themes || []"
+          @select-task="setSelectedTask"
+        />
+
         <!-- Контентная область -->
         <div class="content-box">
-          <Video />
+          <component
+            :is="componentsMap[selectedTask?.type]"
+            v-if="selectedTask"
+            :task="selectedTask"
+          />
         </div>
       </div>
     </div>
   </div>
 </template>
+
 
 <script setup>
 import { ref, onMounted } from 'vue'
@@ -25,22 +34,44 @@ import axios from 'axios'
 
 import Sidebar from '@/components/Sidebar.vue'
 import CourseMenu from '@/components/CourseMenu.vue'
-import Video from '@/components/video.vue'
+
+import TaskVideo from '@/components/tasks/TaskVideo.vue'
+import TaskTest from '@/components/tasks/TaskTest.vue'
+import TaskPractical from '@/components/tasks/TaskPractical.vue'
+import TaskSummary from '@/components/tasks/TaskSummary.vue'
+
+const API_URL = import.meta.env.VITE_API_URL
 
 const route = useRoute()
 const courseId = route.params.id
-
 const course = ref(null)
+const selectedTask = ref(null)
+
+const componentsMap = {
+  video: TaskVideo,
+  test: TaskTest,
+  practical: TaskPractical,
+  summary: TaskSummary
+}
+
+const setSelectedTask = (task) => {
+  selectedTask.value = task
+}
 
 onMounted(async () => {
   try {
-    const res = await axios.get(`http://localhost:5000/courses/${courseId}`)
+    const res = await axios.get(`${API_URL}/courses/${courseId}`)
     course.value = res.data
+
+    // автозагрузка первой задачи
+    const first = course.value?.themes[0]?.tasks[0]
+    if (first) setSelectedTask(first)
   } catch (err) {
     console.error('❌ Ошибка при загрузке курса:', err)
   }
 })
 </script>
+
 
 <style>
 /* 🔹 Главный контейнер */

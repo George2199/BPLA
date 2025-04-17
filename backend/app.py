@@ -1,8 +1,11 @@
 from flask import Flask, jsonify, request
+from flask import send_from_directory
 from flask_cors import CORS
 from flask_migrate import Migrate
 from models import db, Role, Course, Theme, Task
 from config import Config
+import json
+
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -11,6 +14,15 @@ db.init_app(app)
 migrate = Migrate(app, db)
 
 CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
+
+def parse_content(content):
+    try:
+        if isinstance(content, str) and content.strip().startswith('{'):
+            return json.loads(content)
+        return content
+    except Exception as e:
+        print(f"⚠️ Ошибка парсинга контента: {e}")
+        return None
 
 @app.route('/')
 def hello_world():
@@ -56,7 +68,8 @@ def get_courses():
                         {
                             "id": task.id,
                             "title": task.title,
-                            "type": task.type
+                            "type": task.type,
+                            "content": parse_content(task.content)
                         } for task in t.tasks
                     ]
                 } for t in c.themes
@@ -64,6 +77,7 @@ def get_courses():
         } for c in courses
     ])
 
+    
 @app.route('/courses/<int:id>', methods=['GET'])
 def get_course_by_id(id):
     course = Course.query.get(id)
@@ -83,7 +97,8 @@ def get_course_by_id(id):
                     {
                         "id": task.id,
                         "title": task.title,
-                        "type": task.type
+                        "type": task.type,
+                        "content": parse_content(task.content),
                     } for task in t.tasks
                 ]
             } for t in course.themes
@@ -108,6 +123,13 @@ def get_themes():
         } for t in themes
     ])
 
+@app.route('/data/imgs/<path:filename>')
+def serve_course_image(filename):
+    return send_from_directory('data/imgs', filename)
+
+@app.route('/data/videos/<path:filename>')
+def serve_video(filename):
+    return send_from_directory('data/videos', filename)
 
 if __name__ == '__main__':
     app.run(debug=True)
