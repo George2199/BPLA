@@ -1,16 +1,49 @@
 <template>
-    <div class="shlyapabar">
-        <button class="sidebar-button">
-             <img :src="icons[0]" alt="Меню" class="sidebar-icon" />
-         </button>
-      <h1 class="shlyapabar-title">Ваши курсы</h1>
-    </div>
-  </template>
-  
-  <script setup>
-import homeIcon from '@/assets/icons/menu.png';
-const icons = [homeIcon];
-  </script>
+  <div class="shlyapabar">
+    <button class="sidebar-button">
+      <img :src="icons[0]" alt="Меню" class="sidebar-icon" />
+    </button>
+    <h1 class="shlyapabar-title">{{ pageTitle }}</h1>
+  </div>
+</template>
+
+<script setup>
+import homeIcon from '@/assets/icons/menu.png'
+import { useRoute, onBeforeRouteUpdate } from 'vue-router'
+import { computed, ref, watchEffect } from 'vue'
+import axios from 'axios'
+
+const icons = [homeIcon]
+const route = useRoute()
+const courseTitle = ref('')
+
+// Заголовок по умолчанию из meta
+const pageTitle = computed(() => {
+  if (route.name === 'course' && courseTitle.value) {
+    return courseTitle.value
+  }
+  return route.meta.title || ''
+})
+
+// Загружаем название курса по ID
+const fetchCourseTitle = async (id) => {
+  try {
+    const response = await axios.get(`http://localhost:5000/courses/${id}`)
+    courseTitle.value = response.data.title
+  } catch (err) {
+    console.error('Ошибка при загрузке курса:', err)
+    courseTitle.value = 'Курс'
+  }
+}
+
+// Когда маршрут меняется — проверяем, надо ли загружать курс
+watchEffect(() => {
+  if (route.name === 'course' && route.params.id) {
+    fetchCourseTitle(route.params.id)
+  }
+})
+</script>
+
   
   <style>
   .shlyapabar {
@@ -21,7 +54,7 @@ const icons = [homeIcon];
     background: linear-gradient(90deg, #8D06C3, #1D012A);
     display: flex;
     align-items: center;
-    z-index: 1000;
+    z-index: 1;
   }
   
   .shlyapabar-title {

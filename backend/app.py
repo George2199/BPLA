@@ -102,7 +102,7 @@ def get_course_by_id(id):
                     } for task in t.tasks
                 ]
             } for t in course.themes
-        ]
+        ],
     })
 
 
