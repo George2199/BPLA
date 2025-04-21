@@ -88,12 +88,12 @@ onMounted(async () => {
 }
 
 .container {
+  margin-top:90px;
     display: flex;
     flex-wrap: wrap;
     gap: 80px; /* Расстояние между блоками */
     max-width: 2000px; /* Ограничение ширины, чтобы влезало 3 блока */
     margin-left:  50px; 
-    margin-top:  30px;
 }
 
 .card {
@@ -108,12 +108,16 @@ onMounted(async () => {
     0 0 20px 4px rgba(0, 240, 255, 0.2),
     inset 0 0 10px rgba(154, 0, 255, 0.1);
     cursor: pointer;
-    transition: transform 0.2s;
+    transition: box-shadow 0.4s ease;
     text-decoration: none;
     color: inherit;
 }
+
 .card:hover {
-    transform: scale(1.02);
+    box-shadow:
+    0 0 10px 2px rgba(153, 0, 255, 0.753),
+    0 0 20px 4px rgba(0, 238, 255, 0.623),
+    inset 0 0 10px rgba(153, 0, 255, 0.459);
 }
 
 .card-image {
