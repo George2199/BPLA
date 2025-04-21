@@ -28,14 +28,13 @@ import CoursesIcons from '@/components/CoursesIcons.vue';
 
 /* 🔹 Основной контент */
 .main-content {
-  margin-top: 60px; /* высота .shlyapabar */
   margin-left: 60px;  /* Учитываем ширину Sidebar */
-  width: calc(100vw - 60px); /* Вычитаем Sidebar */
-  height: calc(100vh - 120px); 
+  height: calc(100vh - 60px); 
   display: flex;
   flex-direction: column;
   padding: 20px;
-  overflow: hidden;
+  overflow-y:auto;
+  width: calc(100vw - 60px);
 }
 
 </style>

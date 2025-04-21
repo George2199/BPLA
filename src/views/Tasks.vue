@@ -1,11 +1,11 @@
 <template>
   <div class="app-container">
+    <Shlyapabar/>
     <!-- Sidebar -->
     <Sidebar />
 
     <!-- Основной контент -->
     <div class="main-content">
-      <h1 class="course-title">{{ course?.title || 'Загрузка...' }}</h1>
       <div class="content-wrapper">
         <!-- Меню курса -->
         <CourseMenu
@@ -32,6 +32,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 
+import Shlyapabar from '@/components/Shlyapabar.vue';
 import Sidebar from '@/components/Sidebar.vue'
 import CourseMenu from '@/components/CourseMenu.vue'
 
@@ -76,6 +77,7 @@ onMounted(async () => {
 <style>
 /* 🔹 Главный контейнер */
 .app-container {
+  margin-top: 60px;
   display: flex;
   width: 100vw;
   height: 100vh;

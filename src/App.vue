@@ -18,6 +18,7 @@ html, body {
   padding: 0;
   width: 100%;
   height: 100%;
+  overflow-x: hidden;
 }
 
 #app {
@@ -36,4 +37,28 @@ html, body {
 .fade-leave-to {
   opacity: 0;
 }
+
+/* Общий контейнер скроллбара */
+::-webkit-scrollbar {
+  width: 8px; /* ширина вертикального */
+  height: 8px; /* высота горизонтального */
+}
+
+/* Фон скроллбара */
+::-webkit-scrollbar-track {
+  background: transparent; /* подложка */
+  border-radius: 10px;
+}
+
+/* Сам ползунок */
+::-webkit-scrollbar-thumb {
+  background:  rgba(0, 240, 255, 1); /* цвет */
+  border-radius: 10px;
+}
+
+/* При наведении */
+::-webkit-scrollbar-thumb:hover {
+  background: #b42ee6;
+}
+
 </style> 
