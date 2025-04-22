@@ -5,7 +5,6 @@
       '--text': text_color,
       '--kruglik': kruglik_size,
     }">
-      <button class="close-button" @click="visible = false">×</button>
   
       <h2>{{ task?.title || 'Тест' }}</h2>
       <div class="kunt">
@@ -59,20 +58,6 @@
   
   
 <style>
-
-.close-button {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: #ff3333;
-  color: transparent;
-  cursor: pointer;
-  appearance: none;
-  width: var(--kruglik);
-  height: var(--kruglik);
-  border: 1px solid var(--bg);
-  border-radius: 50%;
-}
 
 .kunt {
   flex: 1;
@@ -135,19 +120,5 @@ h2 {
 .text-input:focus {
   border-color: #aa33ff;
   box-shadow: 0 0 0 2px rgba(136, 0, 204, 0.2);
-}
-
-.close-button {
-  align-content: right;
-  top: 12px;
-  right: 12px;
-  background: transparent;
-  color: var(--bg);
-  border: none;
-  font-size: 22px;
-  cursor: pointer;
-  font-weight: bold;
-  line-height: 1;
-  transition: transform 0.2s ease;
 }
 </style>
