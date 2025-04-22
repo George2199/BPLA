@@ -21,9 +21,10 @@ import CoursesIcons from '@/components/CoursesIcons.vue';
 .app-container {
   display: flex;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   background: linear-gradient(to bottom right, #581170, #1D012A);
   color: white;
+  margin-top: 0;
 }
 
 /* 🔹 Основной контент */

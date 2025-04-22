@@ -92,6 +92,19 @@ Task(title="Видео: if/else", type="video", content=VIDEO_PATH + "narezka_19
                         ]
                     })
                 ),
+                Task(
+                    title="Блоки кода 1: Hello, World!",
+                    type="block",
+                    content=json.dumps({
+                        "description": "Собери правильный порядок строк для вывода 'Hello, World!'",
+                        "blocks": [
+                            { "content": "print('Hello, World!')" },
+                            { "content": "def main():" },
+                            { "content": "main()" },
+                            { "content": "    print('Hello, World!')" }
+                        ]
+                    })
+                )
             ])
         ]
 

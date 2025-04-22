@@ -92,20 +92,22 @@ const formattedDuration = computed(() => formatTime(duration.value))
 <style scoped>
 .responsive-video {
   position: relative;
-  padding-bottom: 56.25%;
-  height: 0;
-  overflow: hidden;
+  width: 100%;
+  height: auto;
   max-width: 100%;
   background: #000;
+  display: flex;
+  flex-direction: column;
+  border-radius: inherit; /* ← добавь вот это */
 }
 
+
 .responsive-video video {
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
-  height: 100%;
+  height: auto;
+  border-radius: inherit; /* ← добавь вот это */
 }
+
 
 .controls {
   position: absolute;
