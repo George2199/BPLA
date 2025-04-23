@@ -1,0 +1,46 @@
+# 👉 Node/Vite
+node_modules/
+dist/
+.vite/
+*.log
+
+# 👉 Pyodide (если руками качаешь — оставляй)
+public/pyodide/
+
+# 👉 Python stuff
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+env/
+.venv/
+venv/
+.Python
+
+# 👉 Env & Secrets
+.env
+*.env.*
+
+# 👉 OS и редактор
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# 👉 SQLite / локальные БД
+*.db
+*.sqlite
+*.sqlite3
+
+# 👉 Migrations (если alembic используется)
+migrations/versions/
+
+# 👉 VSCode debug
+*.code-workspace
+
+# 👉 Build scripts
+*.tar.gz
+*.zip
+*.bak
