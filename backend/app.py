@@ -183,6 +183,7 @@ def submit_test():
         "success": True,
         "score": correct_count,
         "total": len(questions),
+        "progress": task.progress,
         "details": details
     })
 

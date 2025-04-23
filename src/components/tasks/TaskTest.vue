@@ -27,6 +27,10 @@
      
     <div v-if="result">
       <p>Результат: {{ result.score }} из {{ result.total }}</p>
+      <p>Прогресс: {{ (result.progress * 100).toFixed(0) }}%</p>
+      <div class="progress-bar">
+    <div class="progress-fill" :style="{ width: (result.progress * 100) + '%' }"></div>
+  </div>
       <ul>
         <li v-for="(r, i) in result.details" :key="i">
           <span :style="{ color: r.is_correct ? 'green' : 'red' }">
@@ -92,6 +96,22 @@ watch(
   
   
 <style>
+
+.progress-bar {
+  width: 100%;
+  height: 12px;
+  background: #eee;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #7000cc;
+  transition: width 0.3s ease;
+}
+
 
 .submit-btn {
   position: absolute;
