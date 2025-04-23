@@ -1,30 +1,46 @@
-# Logs
-logs
+# 👉 Node/Vite
+node_modules/
+dist/
+.vite/
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
 
-node_modules
+# 👉 Pyodide (если руками качаешь — оставляй)
+public/pyodide/
+
+# 👉 Python stuff
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+env/
+.venv/
+venv/
+.Python
+
+# 👉 Env & Secrets
+.env
+*.env.*
+
+# 👉 OS и редактор
 .DS_Store
-dist
-dist-ssr
-coverage
-*.local
+Thumbs.db
+.vscode/
+.idea/
 
-/cypress/videos/
-/cypress/screenshots/
+# 👉 SQLite / локальные БД
+*.db
+*.sqlite
+*.sqlite3
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+# 👉 Migrations (если alembic используется)
+migrations/versions/
 
-*.tsbuildinfo
+# 👉 VSCode debug
+*.code-workspace
+
+# 👉 Build scripts
+*.tar.gz
+*.zip
+*.bak
