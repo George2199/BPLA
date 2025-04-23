@@ -42,30 +42,29 @@ def seed_courses():
         
         python_course = Course(
             title="Python. Введение",
-            image_url=IMG_PATH+"Python.png",
+            image_url=IMG_PATH + "Python.png",
             progress=0.3
         )
 
         cosmos_course = Course(
             title="Аэрокосмос",
-            image_url=IMG_PATH+"Cosmos.png",
+            image_url=IMG_PATH + "Cosmos.png",
             progress=0.0
         )
 
         drone_course = Course(
             title="Управление БПЛА",
-            image_url=IMG_PATH+"Drone.png",
+            image_url=IMG_PATH + "Drone.png",
             progress=0.7
         )
 
-        # Темы только для Python пока
         python_course.themes = [
             Theme(title="Тема 1: Основы синтаксиса", tasks=[
                 Task(title="Видео: Переменные", type="video"),
                 Task(title="Практика: Примитивы", type="practical")
             ]),
             Theme(title="Тема 2: Условия", tasks=[
-Task(title="Видео: if/else", type="video", content=VIDEO_PATH + "narezka_1920x1080.mp4"),
+                Task(title="Видео: if/else", type="video", content=VIDEO_PATH + "narezka_1920x1080.mp4"),
                 Task(
                     title="Тест 1: Контроллер и полёт",
                     type="test",
@@ -78,7 +77,18 @@ Task(title="Видео: if/else", type="video", content=VIDEO_PATH + "narezka_19
                                     "Беспилотное водное средство",
                                     "Беспилотное ветряное средство",
                                     "Беспилотное вкусное средство"
-                                ]
+                                ],
+                                "correct_answers": [0]  # индекс "Беспилотное воздушное средство"
+                            },
+                            {
+                                "question": "Что такое БВС?",
+                                "options": [
+                                    "Беспилотное воздушное средство",
+                                    "Беспилотное водное средство",
+                                    "Беспилотное ветряное средство",
+                                    "Беспилотное вкусное средство"
+                                ],
+                                "correct_answers": [0]  # индекс "Беспилотное воздушное средство"
                             },
                             {
                                 "question": "Где нельзя запускать БВС?",
@@ -87,11 +97,12 @@ Task(title="Видео: if/else", type="video", content=VIDEO_PATH + "narezka_19
                                     "Вблизи аэропортов",
                                     "В закрытых помещениях",
                                     "На Юпитере"
-                                ]
+                                ],
+                                "correct_answers": [0, 2]  # индексы правильных ответов
                             }
                         ]
                     })
-                ),
+                )
             ])
         ]
 

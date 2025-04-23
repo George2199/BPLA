@@ -1,64 +1,117 @@
 <template>
-    <div class="test-card" :style="{
-      '--bg': background_color,
-      '--border': border_color,
-      '--text': text_color,
-      '--kruglik': kruglik_size,
-    }">
-      <button class="close-button" @click="visible = false">×</button>
-  
-      <h2>{{ task?.title || 'Тест' }}</h2>
-      <div class="kunt">
+  <div class="test-card" :style="{
+    '--bg': background_color,
+    '--border': border_color,
+    '--text': text_color,
+    '--kruglik': kruglik_size,
+  }">
+    <button class="close-button" @click="visible = false">×</button>
 
-        <ManySelect
-          v-for="(q, i) in questions"
-          :key="i"
-          :question="q.question"
-          :options="q.options"
-          v-model="answers[i]"
-          :background_color="background_color"
-          :border_color="border_color"
-          :text_color="text_color"
-          :kruglik_size="kruglik_size"
-        />
-      </div>
+    <h2>{{ task?.title || 'Тест' }}</h2>
+    <div class="kunt">
+      <ManySelect
+        v-for="(q, i) in questions"
+        :key="i"
+        :question="q.question"
+        :options="q.options"
+        :model-value="answers[i]"
+        @update:model-value="val => answers[i] = val"
+        :background_color="background_color"
+        :border_color="border_color"
+        :text_color="text_color"
+        :kruglik_size="kruglik_size"
+      />
+      <button class="submit-btn" :disabled="!canSubmit" @click="submitTest">Сдать</button>
+
     </div>
-  </template>
-  
-  <script setup>
-  import { ref, watch } from 'vue'
-  import ManySelect from './testBlocks/ManySelect.vue'
-  
-  const props = defineProps({
-    task: {
-      type: Object,
-      required: true
+     
+    <div v-if="result">
+      <p>Результат: {{ result.score }} из {{ result.total }}</p>
+      <ul>
+        <li v-for="(r, i) in result.details" :key="i">
+          <span :style="{ color: r.is_correct ? 'green' : 'red' }">
+            {{ r.question }} — {{ r.is_correct ? '✔' : '✘' }}
+          </span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, watch, computed } from 'vue'
+import ManySelect from './testBlocks/ManySelect.vue'
+import axios from 'axios'
+
+const result = ref(null)
+
+async function submitTest() {
+  try {
+    const response = await axios.post('http://localhost:5000/submit_test', {
+      answers: answers.value,
+      task_id: props.task.id
+    })
+    result.value = response.data
+  } catch (err) {
+    alert("Ошибка при отправке теста")
+    console.error(err)
+  }
+}
+
+const props = defineProps({
+  task: {
+    type: Object,
+    required: true
+  }
+})
+
+const background_color = "#ffffff"
+const border_color = "#8800cc"
+const text_color = "#000000"
+const kruglik_size = "16px"
+
+const visible = ref(true)
+const questions = ref([])
+const answers = ref([])
+
+const canSubmit = computed(() =>
+  answers.value.some(a => Array.isArray(a) && a.length > 0)
+)
+
+watch(
+  () => props.task,
+  (newTask) => {
+    if (newTask?.content?.questions) {
+      questions.value = newTask.content.questions
+      answers.value = newTask.content.questions.map(() => []) // Новый массив на каждый вопрос
     }
-  })
-  
-  const background_color = "#ffffff"
-  const border_color = "#8800cc"
-  const text_color = "#000000"
-  const kruglik_size = "16px"
-  
-  const visible = ref(true)
-  const questions = ref([])
-  const answers = ref([])
-  
-  watch(
-    () => props.task,
-    (newTask) => {
-      if (newTask?.content?.questions) {
-        questions.value = newTask.content.questions
-        answers.value = Array(questions.value.length).fill([])
-      }
-    },
-    { immediate: true }
-  )
-  </script>
+  },
+  { immediate: true }
+)
+</script>
   
   
 <style>
+
+.submit-btn {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+
+  background: #7000cc;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  padding: 10px 20px;
+}
+
+.submit-btn:disabled {
+  background: #aaa;       /* посерее фон */
+  cursor: not-allowed;    /* курсор с крестиком */
+  opacity: 0.7;           /* немного тусклее */
+}
 
 .close-button {
   position: absolute;
@@ -80,7 +133,7 @@
   overflow-y: auto;
   padding-right: 10px;
   scrollbar-gutter: stable;
-
+  position: relative;
 }
 
 
