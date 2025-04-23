@@ -101,7 +101,8 @@ Task(title="Видео: if/else", type="video", content=VIDEO_PATH + "narezka_19
                             { "content": "print('Hello, World!')" },
                             { "content": "def main():" },
                             { "content": "main()" },
-                            { "content": "    print('Hello, World!')" }
+                            { "content": "    print('Hello, World!')" },
+                            { "content": "print('YyYyYYyYTataBye-bye, World!!!')"},
                         ]
                     })
                 )
