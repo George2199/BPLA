@@ -36,3 +36,6 @@ class Task(db.Model):
     type = db.Column(db.String)  # video, test, etc.
     content = db.Column(JSON, nullable=True)  # вот это и есть "данные" задачи
     theme_id = db.Column(db.Integer, db.ForeignKey('themes.id'))
+    status = db.Column(db.String, default='undone')  # waiting, passed, failed
+    progress = db.Column(db.Float, default=0.0)
+    
