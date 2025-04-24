@@ -1,7 +1,6 @@
 <template>
   <Shlyapabar />
   <div class="app-container">
-    <Sidebar />
     <div class="main-content">
       <CoursesIcons/>
     </div>
@@ -10,7 +9,6 @@
 
 <script setup>
 import Shlyapabar from '@/components/Shlyapabar.vue';
-import Sidebar from '@/components/Sidebar.vue';
 import CoursesIcons from '@/components/CoursesIcons.vue';
 </script>
 
@@ -29,13 +27,11 @@ import CoursesIcons from '@/components/CoursesIcons.vue';
 
 /* 🔹 Основной контент */
 .main-content {
-  margin-left: 60px;  /* Учитываем ширину Sidebar */
-  height: calc(100vh - 60px); 
+  height: 100%; 
   display: flex;
   flex-direction: column;
-  padding: 20px;
   overflow-y:auto;
-  width: calc(100vw - 60px);
+  width: 100%;
 }
 
 </style>

@@ -119,7 +119,6 @@ onMounted(async () => {
 
 
 .content-wrapper {
-  margin-top: 60px;
   display: flex;
   gap: 20px;
   width: 100%;

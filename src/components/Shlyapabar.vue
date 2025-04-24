@@ -49,20 +49,38 @@ watchEffect(() => {
   .shlyapabar {
     position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     height: 60px;
-    width: 100%;
     background: linear-gradient(90deg, #8D06C3, #1D012A);
     display: flex;
     align-items: center;
-    z-index: 1;
+    z-index: 9999; /* Поверх всего! */
+    box-sizing: border-box;
   }
+
   
   .shlyapabar-title {
-    padding-left: 30px;
     color: white;
     font-size: 22px;
     font-weight: bold;
     letter-spacing: 1px;
     margin: 0;
+    padding-left: 20px;
   }
+
+  .sidebar-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sidebar-icon {
+    width: 32px;
+    height: 32px;
+  }
+
   </style>
