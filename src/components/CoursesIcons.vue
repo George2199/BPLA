@@ -88,12 +88,12 @@ onMounted(async () => {
 }
 
 .container {
-  margin-top:90px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 80px; /* Расстояние между блоками */
-    max-width: 2000px; /* Ограничение ширины, чтобы влезало 3 блока */
-    margin-left:  50px; 
+  margin-top:60px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 80px; /* Расстояние между блоками */
+  max-width: 2000px; /* Ограничение ширины, чтобы влезало 3 блока */
+  margin-left:  50px; 
 }
 
 .card {

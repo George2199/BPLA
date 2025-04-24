@@ -49,6 +49,7 @@ html, body {
   flex-grow: 1;
   height: 100%;
   overflow: hidden;
+  padding-top: 60px; /* вот здесь — учитываем высоту шляпы */
 }
 
 .main-scroll-zone {
