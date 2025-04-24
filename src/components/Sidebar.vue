@@ -3,13 +3,22 @@
     <!-- Книга (router-link) -->
     <router-link to="/courses" class="sidebar-link">
       <button class="sidebar-button">
-        <img :src="icons[0]" alt="Курсы" class="sidebar-icon" />
+        <img :src="icons[0]" alt="Courses" class="sidebar-icon" />
       </button>
     </router-link>
 
+    <button class="sidebar-button">
+      <img :src="icons[1]" alt="Terminal" class="sidebar-icon" />
+    </button>
+
+    <button class="sidebar-button" @click="toggleConsole">
+      <img :src="commandIcon" alt="Console" class="sidebar-icon" />
+    </button>
+
+
     <!-- Остальные кнопки -->
     <button
-      v-for="(icon, index) in icons.slice(1)"
+      v-for="(icon, index) in icons.slice(3)"
       :key="index"
       class="sidebar-button"
     >
@@ -25,26 +34,23 @@ import codeIcon from '@/assets/icons/code.png';
 import commandIcon from '@/assets/icons/command.png';
 import simulatorIcon from '@/assets/icons/simulator.png';
 import chatIcon from '@/assets/icons/chat.png';
+import { toggleConsole } from '@/store/console'
 
 const icons = [coursesIcon, codeIcon, commandIcon, simulatorIcon, chatIcon];
 </script>
 
 
 <style>
-/* 📌 Sidebar */
 .sidebar {
   width: 60px;
-  height: 100vh;
+  height: 100%;
   background: #8D06C3;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 15px 0;
-  position: fixed;
-  top: 60px;
-  left: 0;
+  box-sizing: border-box;
 }
-
 
 .sidebar-button,
 .sidebar-button:link,
