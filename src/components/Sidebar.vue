@@ -42,13 +42,13 @@ const icons = [coursesIcon, codeIcon, commandIcon, simulatorIcon, chatIcon];
 
 <style>
 .sidebar {
+  margin-top: 60px; /* ⚠️ соответствует высоте .shlyapabar */
   width: 60px;
-  height: 100%;
+  height: calc(100vh - 60px); /* тоже учли шапку */
   background: #8D06C3;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 15px 0;
   box-sizing: border-box;
 }
 
