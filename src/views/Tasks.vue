@@ -1,8 +1,6 @@
 <template>
   <div class="app-container">
     <Shlyapabar/>
-    <!-- Sidebar -->
-    <Sidebar />
 
     <!-- Основной контент -->
     <div class="main-content">
@@ -100,8 +98,8 @@ onMounted(async () => {
 
 /* 🔹 Главный контейнер */
 .app-container {
+  flex-grow: 1;
   display: flex;
-  width: 100vw;
   min-height: 100vh; /* 👈 вместо height: 100vh */
   background: linear-gradient(to bottom right, #6a0dad, #2d033b);
   color: white;
@@ -110,13 +108,15 @@ onMounted(async () => {
 
 /* 🔹 Основной контент */
 .main-content {
-  margin-left: 70px;  /* Учитываем ширину Sidebar */
-  width: calc(100vw - 70px); /* Вычитаем Sidebar */
+  flex-grow: 1;
+  min-width: 0;
+  height: 100%;
   display: flex;
   flex-direction: column;
   padding: 20px;
   overflow: hidden;
 }
+
 
 .content-wrapper {
   margin-top: 60px;
