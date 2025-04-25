@@ -54,7 +54,7 @@ watchEffect(() => {
     background: linear-gradient(90deg, #8D06C3, #1D012A);
     display: flex;
     align-items: center;
-    z-index: 1;
+    z-index: 10000;
   }
   
   .shlyapabar-title {

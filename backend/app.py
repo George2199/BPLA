@@ -22,6 +22,25 @@ def parse_content(content):
     except Exception as e:
         print(f"⚠️ Ошибка парсинга контента: {e}")
         return None
+    
+def update_course_progress(course_id):
+    course = Course.query.get(course_id)
+    if not course:
+        return
+
+    test_tasks = Task.query.join(Theme).filter(
+        Theme.course_id == course.id,
+        Task.type == 'test'
+    ).all()
+
+    if not test_tasks:
+        course.progress = 0.0
+    else:
+        total = len(test_tasks)
+        passed = sum(task.progress for task in test_tasks)
+        course.progress = passed / total
+
+    db.session.commit()
 
 @app.route('/')
 def hello_world():
@@ -52,7 +71,7 @@ def login():
     
 @app.route('/courses', methods=['GET'])
 def get_courses():
-    courses = Course.query.all()
+    courses = Course.query.order_by(Course.id).all()
     return jsonify([
         {
             "id": c.id,
@@ -75,6 +94,7 @@ def get_courses():
             ]
         } for c in courses
     ])
+
 
     
 @app.route('/courses/<int:id>', methods=['GET'])
@@ -178,6 +198,20 @@ def submit_test():
     task.status = 'passed' if score_ratio >= 0.7 else 'failed'
     task.progress = score_ratio
     db.session.commit()
+
+    theme = Theme.query.get(task.theme_id)
+    if theme:
+     course = Course.query.get(theme.course_id)
+    if course:
+        # Пересчитать средний прогресс по всем таскам в курсе
+        all_tasks = Task.query.join(Theme).filter(Theme.course_id == course.id).all()
+        if all_tasks:
+            avg_progress = sum(t.progress for t in all_tasks) / len(all_tasks)
+            course.progress = avg_progress
+            db.session.commit()
+
+
+    update_course_progress(course.id)
 
     return jsonify({
         "success": True,
