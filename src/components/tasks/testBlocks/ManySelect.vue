@@ -1,65 +1,74 @@
 <template>
-    <div class="question-block">
-      <p><strong>{{ question }}</strong></p>
-      <label
-        v-for="(option, i) in options"
-        :key="i"
-        class="option"
-        :style="{
-          '--bg': background_color,
-          '--border': border_color,
-          '--text': text_color,
-          '--kruglik': kruglik_size,
-          }"
-      >
-        <input
-          type="checkbox"
-          :value="option"
-          :checked="(modelValue || []).includes(option)"
-          @change="onChange(option, $event)"
-          class="option"
-        />
-        {{ option }}
-      </label>
-    </div>
-  </template>
+  <div class="question-block">
+    <p><strong>{{ question }}</strong></p>
+    <label
+      v-for="(option, index) in options"
+      :key="index"
+      class="option"
+      :style="{
+        '--bg': background_color,
+        '--border': border_color,
+        '--text': text_color,
+        '--kruglik': kruglik_size,
+      }"
+    >
+    <input
+      type="checkbox"
+      :value="index"
+      :checked="modelValue.includes(index)"
+      @change="onChange(index, $event)"
+    />
+
+      {{ option }}
+    </label>
+  </div>
   
-  <script setup>
-  const props = defineProps({
-    question: String,
-    options: Array,
-    modelValue: Array,
-    background_color: {
-      type: String,
-      default: '#ffffff'
-    },
-    border_color: {
-      type: String,
-      default: '#8800cc'
-    },
-    text_color: {
-      type: String,
-      default: '#000000'
-    },
-    kruglik_size: {
-      type: String,
-      default: '16px'
-    },
-  })
-  
-  const emit = defineEmits(['update:modelValue'])
-  
-  function onChange(option, event) {
-    const newValue = [...props.modelValue]
-    if (event.target.checked) {
-      newValue.push(option)
-    } else {
-      const index = newValue.indexOf(option)
-      if (index > -1) newValue.splice(index, 1)
-    }
-    emit('update:modelValue', newValue)
+</template>
+
+<script setup>
+const props = defineProps({
+  question: String,
+  options: Array, // простой массив строк
+  modelValue: Array,
+  background_color: {
+    type: String,
+    default: '#ffffff'
+  },
+  border_color: {
+    type: String,
+    default: '#8800cc'
+  },
+  text_color: {
+    type: String,
+    default: '#000000'
+  },
+  kruglik_size: {
+    type: String,
+    default: '16px'
   }
-  </script>
+})
+
+const emit = defineEmits(['update:modelValue'])
+
+function onChange(index, event) {
+  const wasChecked = props.modelValue.includes(index)
+  const checked = event.target.checked
+
+  let newValue = []
+
+  if (checked && !wasChecked) {
+    newValue = [...props.modelValue, index]
+  } else if (!checked && wasChecked) {
+    newValue = props.modelValue.filter(i => i !== index)
+  } else {
+    newValue = [...props.modelValue] // без изменений
+  }
+
+  emit('update:modelValue', newValue)
+}
+
+</script>
+
 <style scoped>
 
 .question-block{

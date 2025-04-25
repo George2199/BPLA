@@ -1,63 +1,168 @@
 <template>
-    <div class="test-card" :style="{
-      '--bg': background_color,
-      '--border': border_color,
-      '--text': text_color,
-      '--kruglik': kruglik_size,
-    }">
-  
-      <h2>{{ task?.title || 'Тест' }}</h2>
-      <div class="kunt">
+  <div class="test-card" :style="{
+    '--bg': background_color,
+    '--border': border_color,
+    '--text': text_color,
+    '--kruglik': kruglik_size,
+  }">
+    <button class="close-button" @click="visible = false">×</button>
 
-        <ManySelect
-          v-for="(q, i) in questions"
-          :key="i"
-          :question="q.question"
-          :options="q.options"
-          v-model="answers[i]"
-          :background_color="background_color"
-          :border_color="border_color"
-          :text_color="text_color"
-          :kruglik_size="kruglik_size"
-        />
-      </div>
+    <h2>{{ task?.title || 'Тест' }}</h2>
+    <div class="kunt">
+      <ManySelect
+        v-for="(q, i) in questions"
+        :key="i"
+        :question="q.question"
+        :options="q.options"
+        :model-value="answers[i]"
+        @update:model-value="val => answers[i] = val"
+        :background_color="background_color"
+        :border_color="border_color"
+        :text_color="text_color"
+        :kruglik_size="kruglik_size"
+       />
+       <div class="under_kunt_for_button">
+      <button class="submit-btn" :disabled="!canSubmit" @click="submitTest">Сдать</button>
+
     </div>
-  </template>
-  
-  <script setup>
-  import { ref, watch } from 'vue'
-  import ManySelect from './testBlocks/ManySelect.vue'
-  
-  const props = defineProps({
-    task: {
-      type: Object,
-      required: true
+
+    </div>
+
+   
+     
+    <div v-if="result">
+      <p>Результат: {{ result.score }} из {{ result.total }}</p>
+      <p>Прогресс: {{ (result.progress * 100).toFixed(0) }}%</p>
+      <div class="progress-bar">
+    <div class="progress-fill" :style="{ width: (result.progress * 100) + '%' }"></div>
+  </div>
+      
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, watch, computed } from 'vue'
+import ManySelect from './testBlocks/ManySelect.vue'
+import axios from 'axios'
+
+const result = ref(null)
+
+async function submitTest() {
+  try {
+    const response = await axios.post('http://localhost:5000/submit_test', {
+      answers: answers.value,
+      task_id: props.task.id
+    })
+    result.value = response.data
+    await refreshCourses()
+  } catch (err) {
+    alert("Ошибка при отправке теста")
+    console.error(err)
+  }
+}
+
+async function refreshCourses() {
+  try {
+    const res = await axios.get(`${API_URL}/courses`);
+    courses.value = res.data;
+  } catch (e) {
+    console.error('❌ Не удалось обновить курсы:', e);
+  }
+}
+
+
+const props = defineProps({
+  task: {
+    type: Object,
+    required: true
+  }
+})
+
+const background_color = "#ffffff"
+const border_color = "#8800cc"
+const text_color = "#000000"
+const kruglik_size = "16px"
+
+const visible = ref(true)
+const questions = ref([])
+const answers = ref([])
+
+const canSubmit = computed(() =>
+  answers.value.some(a => Array.isArray(a) && a.length > 0)
+)
+
+watch(
+  () => props.task,
+  (newTask) => {
+    if (newTask?.content?.questions) {
+      questions.value = newTask.content.questions
+      answers.value = newTask.content.questions.map(() => []) // Новый массив на каждый вопрос
     }
-  })
-  
-  const background_color = "#ffffff"
-  const border_color = "#8800cc"
-  const text_color = "#000000"
-  const kruglik_size = "16px"
-  
-  const visible = ref(true)
-  const questions = ref([])
-  const answers = ref([])
-  
-  watch(
-    () => props.task,
-    (newTask) => {
-      if (newTask?.content?.questions) {
-        questions.value = newTask.content.questions
-        answers.value = Array(questions.value.length).fill([])
-      }
-    },
-    { immediate: true }
-  )
-  </script>
+  },
+  { immediate: true }
+)
+</script>
   
   
 <style>
+
+.progress-bar {
+  width: 100%;
+  height: 12px;
+  background: #eee;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #7000cc;
+  transition: width 0.3s ease;
+}
+
+
+.submit-btn {
+  position: absolute;
+  bottom: 15px;
+  right: 0px;
+
+  background: #7000cc;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  padding: 10px 20px;
+}
+
+.submit-btn:disabled {
+  background: #aaa;       /* посерее фон */
+  cursor: not-allowed;    /* курсор с крестиком */
+  opacity: 0.7;           /* немного тусклее */
+}
+
+.close-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #ff3333;
+  color: transparent;
+  cursor: pointer;
+  appearance: none;
+  width: var(--kruglik);
+  height: var(--kruglik);
+  border: 1px solid var(--bg);
+  border-radius: 50%;
+}
+
+.under_kunt_for_button {
+
+  height:20px;
+  color: transparent;
+  position: relative;
+}
 
 .kunt {
   flex: 1;
@@ -65,7 +170,8 @@
   overflow-y: auto;
   padding-right: 10px;
   scrollbar-gutter: stable;
-
+  position: relative;
+  margin-bottom: 30px;
 }
 
 
@@ -105,6 +211,7 @@ h2 {
   font-weight: 800;
   font-size: 20px;
   margin-bottom: 15px;
+  margin-top: 0px;
 }
 
 .text-input {

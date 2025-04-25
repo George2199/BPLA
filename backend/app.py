@@ -6,7 +6,6 @@ from models import db, Role, Course, Theme, Task
 from config import Config
 import json
 
-
 app = Flask(__name__)
 app.config.from_object(Config)
 
@@ -23,6 +22,25 @@ def parse_content(content):
     except Exception as e:
         print(f"⚠️ Ошибка парсинга контента: {e}")
         return None
+    
+def update_course_progress(course_id):
+    course = Course.query.get(course_id)
+    if not course:
+        return
+
+    test_tasks = Task.query.join(Theme).filter(
+        Theme.course_id == course.id,
+        Task.type == 'test'
+    ).all()
+
+    if not test_tasks:
+        course.progress = 0.0
+    else:
+        total = len(test_tasks)
+        passed = sum(task.progress for task in test_tasks)
+        course.progress = passed / total
+
+    db.session.commit()
 
 @app.route('/')
 def hello_world():
@@ -53,7 +71,7 @@ def login():
     
 @app.route('/courses', methods=['GET'])
 def get_courses():
-    courses = Course.query.all()
+    courses = Course.query.order_by(Course.id).all()
     return jsonify([
         {
             "id": c.id,
@@ -76,6 +94,7 @@ def get_courses():
             ]
         } for c in courses
     ])
+
 
     
 @app.route('/courses/<int:id>', methods=['GET'])
@@ -130,6 +149,77 @@ def serve_course_image(filename):
 @app.route('/data/videos/<path:filename>')
 def serve_video(filename):
     return send_from_directory('data/videos', filename)
+
+@app.route('/submit_test', methods=['POST'])
+def submit_test():
+    import json
+
+    data = request.get_json()
+    answers = data.get('answers')
+    task_id = data.get('task_id')
+
+    task = Task.query.get(task_id)
+    if not task or task.type != 'test':
+        return jsonify({"success": False, "message": "Неверный task_id"}), 400
+
+    # Парсим контент
+    content = task.content
+    if isinstance(content, str):
+        try:
+            content = json.loads(content)
+        except json.JSONDecodeError:
+            return jsonify({"success": False, "message": "Невозможно прочитать контент теста"}), 500
+
+    questions = content.get("questions", [])
+    if len(answers) != len(questions):
+        return jsonify({"success": False, "message": "Ответов должно быть столько же, сколько вопросов"}), 400
+
+    correct_count = 0
+    details = []
+
+    for i, question in enumerate(questions):
+        correct_answers = set(map(int, question.get("correct_answers", [])))
+        user_answers = set(map(int, answers[i])) if isinstance(answers[i], list) else set()
+
+        is_correct = user_answers == correct_answers
+        print('usr:', user_answers, 'corr:', correct_answers)
+        if is_correct:
+            correct_count += 1
+
+        details.append({
+            "question": question.get("question", "???"),
+            "is_correct": is_correct,
+            "your": sorted(list(user_answers)),
+            "correct": sorted(list(correct_answers))
+        })
+
+    # Сохраняем статус
+    score_ratio = correct_count / len(questions)
+    task.status = 'passed' if score_ratio >= 0.7 else 'failed'
+    task.progress = score_ratio
+    db.session.commit()
+
+    theme = Theme.query.get(task.theme_id)
+    if theme:
+     course = Course.query.get(theme.course_id)
+    if course:
+        # Пересчитать средний прогресс по всем таскам в курсе
+        all_tasks = Task.query.join(Theme).filter(Theme.course_id == course.id).all()
+        if all_tasks:
+            avg_progress = sum(t.progress for t in all_tasks) / len(all_tasks)
+            course.progress = avg_progress
+            db.session.commit()
+
+
+    update_course_progress(course.id)
+
+    return jsonify({
+        "success": True,
+        "score": correct_count,
+        "total": len(questions),
+        "progress": task.progress,
+        "details": details
+    })
 
 if __name__ == '__main__':
     app.run(debug=True)
