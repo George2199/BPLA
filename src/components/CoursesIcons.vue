@@ -6,12 +6,14 @@
   class="card"
   :to="`/courses/${course.id}`"
 >
-  <div class="progress-wrapper">
-    <div
-      class="progress-bar"
-      :style="{ height: (course.progress * 100) + '%' }"
-    ></div>
-  </div>
+<div class="progress-wrapper">
+  <div
+    class="progress-bar"
+    :class="course.progress === 1 ? 'progress-bar-full' : 'progress-bar-gradient'"
+    :style="{ height: (course.progress * 100) + '%' }"
+  ></div>
+</div>
+
 
   <img
     class="card-image"
@@ -74,7 +76,17 @@ onMounted(async () => {
   align-items: flex-end; /* 👈 ВАЖНО: чтобы fill шёл снизу */
 }
 
-.progress-bar {
+.progress-bar-full {
+  width: 100%;
+  background: linear-gradient(
+    to bottom,
+    rgb(0, 240, 255, 1) 25%,
+    rgb(153, 0, 255) 80%
+  );
+  transition: height 0.3s ease-in-out;
+}
+
+.progress-bar-gradient {
   width: 100%;
   background: linear-gradient(
     to bottom,

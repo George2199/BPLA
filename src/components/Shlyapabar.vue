@@ -55,8 +55,7 @@ watchEffect(() => {
     background: linear-gradient(90deg, #8D06C3, #1D012A);
     display: flex;
     align-items: center;
-    z-index: 9999; /* Поверх всего! */
-    box-sizing: border-box;
+    z-index: 10000;
   }
 
   

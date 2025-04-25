@@ -20,10 +20,15 @@
         :border_color="border_color"
         :text_color="text_color"
         :kruglik_size="kruglik_size"
-      />
+       />
+       <div class="under_kunt_for_button">
       <button class="submit-btn" :disabled="!canSubmit" @click="submitTest">Сдать</button>
 
     </div>
+
+    </div>
+
+   
      
     <div v-if="result">
       <p>Результат: {{ result.score }} из {{ result.total }}</p>
@@ -31,13 +36,7 @@
       <div class="progress-bar">
     <div class="progress-fill" :style="{ width: (result.progress * 100) + '%' }"></div>
   </div>
-      <ul>
-        <li v-for="(r, i) in result.details" :key="i">
-          <span :style="{ color: r.is_correct ? 'green' : 'red' }">
-            {{ r.question }} — {{ r.is_correct ? '✔' : '✘' }}
-          </span>
-        </li>
-      </ul>
+      
     </div>
   </div>
 </template>
@@ -56,11 +55,22 @@ async function submitTest() {
       task_id: props.task.id
     })
     result.value = response.data
+    await refreshCourses()
   } catch (err) {
     alert("Ошибка при отправке теста")
     console.error(err)
   }
 }
+
+async function refreshCourses() {
+  try {
+    const res = await axios.get(`${API_URL}/courses`);
+    courses.value = res.data;
+  } catch (e) {
+    console.error('❌ Не удалось обновить курсы:', e);
+  }
+}
+
 
 const props = defineProps({
   task: {
@@ -115,8 +125,8 @@ watch(
 
 .submit-btn {
   position: absolute;
-  bottom: 20px;
-  right: 20px;
+  bottom: 15px;
+  right: 0px;
 
   background: #7000cc;
   color: white;
@@ -147,6 +157,13 @@ watch(
   border-radius: 50%;
 }
 
+.under_kunt_for_button {
+
+  height:20px;
+  color: transparent;
+  position: relative;
+}
+
 .kunt {
   flex: 1;
   background: var(--bg);
@@ -154,6 +171,7 @@ watch(
   padding-right: 10px;
   scrollbar-gutter: stable;
   position: relative;
+  margin-bottom: 30px;
 }
 
 
@@ -193,6 +211,7 @@ h2 {
   font-weight: 800;
   font-size: 20px;
   margin-bottom: 15px;
+  margin-top: 0px;
 }
 
 .text-input {
