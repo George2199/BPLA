@@ -5,13 +5,17 @@ const routes = [
     path: '/',
     name: 'login',
     component: () => import('@/views/Autorizatiion.vue'),
-    meta: { title: 'Вход' }
+    meta: {
+      title: 'Вход',
+      hideSidebar: true,
+      hasHeader: false
+     }
   },
   {
     path: '/courses',
     name: 'home',
     component: () => import('@/views/Courses.vue'),
-    meta: { title: 'Курсы' }
+    meta: { title: 'Курсы'}
   },
   {
     path: '/tasks',

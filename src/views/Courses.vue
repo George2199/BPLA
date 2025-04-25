@@ -32,6 +32,7 @@ import CoursesIcons from '@/components/CoursesIcons.vue';
   flex-direction: column;
   overflow-y:auto;
   width: 100%;
+  padding-top: 60px;
 }
 
 </style>
