@@ -1,14 +1,11 @@
 <template>
-  <div class="task-block-container">
-    <!-- 📄 Описание (над блоками) -->
+  <div class="task-block-container" @keydown="handleKey" tabindex="0">
     <p class="description" v-if="task?.content?.description">
       {{ task.content.description }}
     </p>
 
-    <!-- Блоки: сборка и фрагменты -->
     <div class="blocks-wrapper">
-
-      <!-- Сборка (влево) -->
+      <!-- Ответ -->
       <div class="section answer-section">
         <draggable
           v-model="answerBlocks"
@@ -17,12 +14,20 @@
           item-key="id"
         >
           <template #item="{ element }">
-            <div class="code-block yellow-border">{{ element.content }}</div>
+            <div
+              class="code-block yellow-border code-block-wrapper"
+              :class="{ selected: selectedBlockId === element.id && selectedFromAnswer }"
+              @click="selectBlock(element.id, true)"
+            >
+              <div class="code-text">
+                {{ '\u00A0\u00A0\u00A0\u00A0'.repeat(element.indentLevel) + element.content }}
+              </div>
+            </div>
           </template>
         </draggable>
       </div>
 
-      <!-- Исходные фрагменты (вправо) -->
+      <!-- Исходники -->
       <div class="section">
         <draggable
           :list="shuffledBlocks"
@@ -33,46 +38,211 @@
           :sort="false"
         >
           <template #item="{ element }">
-            <div class="code-block white-border">{{ element.content }}</div>
+            <div
+              class="code-block white-border"
+              :class="{ selected: selectedBlockId === element.id && !selectedFromAnswer }"
+              @click="selectBlock(element.id, false)"
+            >
+              {{ element.content }}
+            </div>
           </template>
         </draggable>
       </div>
     </div>
 
-      <button @click="runCode" class="run-button" :disabled="isRunning">
-        ▶ {{ isRunning ? 'Запуск...' : 'Запустить' }}
-      </button>
+    <button @click="runCode" class="run-button" :disabled="isRunning">
+      ▶ {{ isRunning ? 'Запуск...' : 'Запустить' }}
+    </button>
   </div>
 </template>
-
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import draggable from 'vuedraggable'
 import { consoleOutput } from '@/store/console'
 
-const props = defineProps({
-  task: Object
-})
-
+// ====== ПЕРЕМЕННЫЕ ======
+const props = defineProps({ task: Object })
 const originalBlocks = ref([])
 const shuffledBlocks = ref([])
 const answerBlocks = ref([])
+const selectedBlockId = ref(null)
+const selectedFromAnswer = ref(true)
 const isRunning = ref(false)
 
-// ✅ Используем глобальный кэш
 const pyodide = ref(window.__pyodide || null)
 const pyodideReady = ref(!!window.__pyodide)
 
+
+// ====== ВСПОМОГАТЕЛЬНЫЕ ======
 function generateId() {
   return '_' + Math.random().toString(36).substr(2, 9)
 }
 
-const cloneBlock = (original) => ({ ...original })
+const cloneBlock = (original) => ({
+  ...original,
+  id: generateId(),
+  indentLevel: original.indentLevel ?? 0
+})
 
+const selectBlock = (id, fromAnswer = true) => {
+  selectedBlockId.value = id
+  selectedFromAnswer.value = fromAnswer
+}
+
+// ====== ЛОГИЧЕСКИЕ ======
+const handleKey = (event) => {
+  if (!selectedBlockId.value) return
+
+  const fromAnswer = selectedFromAnswer.value
+  const currentList = fromAnswer ? answerBlocks.value : shuffledBlocks.value
+  const index = currentList.findIndex(b => b.id === selectedBlockId.value)
+  if (index === -1) return
+
+  const isAlt = event.altKey
+  const isShift = event.shiftKey
+
+  console.log('👉 handleKey', {
+    key: event.key,
+    alt: isAlt,
+    shift: isShift,
+    ctrl: event.ctrlKey,
+    selectedBlockId: selectedBlockId.value,
+    selectedFromAnswer: selectedFromAnswer.value,
+    currentList,
+  })
+
+  const moveSelection = (direction) => {
+    const newIndex = index + direction
+    if (newIndex >= 0 && newIndex < currentList.length) {
+      selectedBlockId.value = currentList[newIndex].id
+    }
+  }
+
+  const moveBlock = (direction) => {
+    const newIndex = index + direction
+    if (newIndex >= 0 && newIndex < currentList.length) {
+      const temp = currentList[index]
+      currentList.splice(index, 1)
+      currentList.splice(newIndex, 0, temp)
+      selectedBlockId.value = temp.id
+    }
+  }
+
+  const transferBlock = (toAnswer) => {
+    const source = fromAnswer ? answerBlocks.value : shuffledBlocks.value
+    const target = fromAnswer ? shuffledBlocks.value : answerBlocks.value
+
+    console.log('💣 TRANSFER START')
+    console.log('source:', source)
+    console.log('target:', target)
+    console.log('selected index:', index)
+    console.log('selected id:', selectedBlockId.value)
+
+    if (!Array.isArray(source) || !Array.isArray(target)) {
+      console.error('🔥 source или target НЕ массивы', { source, target })
+      return
+    }
+
+    const [moved] = source.splice(index, 1)
+    if (!moved) {
+      console.error('❌ НИЧЕГО НЕ ПЕРЕМЕСТИЛОСЬ')
+      return
+    }
+
+    target.push(moved)
+    selectedBlockId.value = moved.id
+    selectedFromAnswer.value = toAnswer
+
+    console.log('✅ TRANSFER SUCCESS')
+    console.log('new source:', source)
+    console.log('new target:', target)
+  }
+
+  // =================== ALT-логика ===================
+  if (isAlt) {
+    if (event.key === 'ArrowUp') {
+      event.preventDefault()
+      moveBlock(-1)
+      return
+    }
+    if (event.key === 'ArrowDown') {
+      event.preventDefault()
+      moveBlock(1)
+      return
+    }
+    if (event.key === 'ArrowRight') {
+      event.preventDefault()
+      if (fromAnswer) transferBlock(false)
+      return
+    }
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault()
+      if (!fromAnswer) transferBlock(true)
+      return
+    }
+  }
+
+  // =================== Навигация ===================
+  if (event.key === 'ArrowUp') {
+    event.preventDefault()
+    moveSelection(-1)
+    return
+  }
+  if (event.key === 'ArrowDown') {
+    event.preventDefault()
+    moveSelection(1)
+    return
+  }
+  if (event.key === 'ArrowLeft') {
+    event.preventDefault()
+    if (!fromAnswer && answerBlocks.value.length > 0) {
+      selectedBlockId.value = answerBlocks.value[0].id
+      selectedFromAnswer.value = true
+    }
+    return
+  }
+  if (event.key === 'ArrowRight') {
+    event.preventDefault()
+    if (fromAnswer && shuffledBlocks.value.length > 0) {
+      selectedBlockId.value = shuffledBlocks.value[0].id
+      selectedFromAnswer.value = false
+    }
+    return
+  }
+
+  // =================== Tabulation (только для ответа) ===================
+  if (event.key === 'Tab' && fromAnswer) {
+    event.preventDefault()
+    const block = currentList[index]
+    if (block) {
+      if (isShift) {
+        decreaseIndent(block)
+      } else {
+        increaseIndent(block)
+      }
+    }
+  }
+
+  // =================== ENTER — Запуск кода ===================
+  if (event.key === 'Enter') {
+    event.preventDefault()
+    runCode()
+    return
+  }
+}
+
+const increaseIndent = (block) => {
+  if (block.indentLevel < 10) block.indentLevel++
+}
+const decreaseIndent = (block) => {
+  if (block.indentLevel > 0) block.indentLevel--
+}
+
+
+// ====== PYODIDE ИНИЦИАЛИЗАЦИЯ ======
 const initPyodide = async () => {
-  if (window.__pyodide) return // 🔁 Уже загружено
-
+  if (window.__pyodide) return
   try {
     consoleOutput.value = '⏳ Загружаем Pyodide...'
     const instance = await window.loadPyodide({ indexURL: '/pyodide/' })
@@ -91,7 +261,9 @@ const runCode = async () => {
     return
   }
 
-  const code = answerBlocks.value.map(b => b.content).join('\n')
+  const code = answerBlocks.value
+    .map(b => '    '.repeat(b.indentLevel) + b.content)
+    .join('\n')
 
   if (!code.trim()) {
     consoleOutput.value = '⚠️ Нет кода для запуска.'
@@ -102,15 +274,15 @@ const runCode = async () => {
     isRunning.value = true
     consoleOutput.value = ''
 
-    pyodide.value.setStdout({ batched: (s) => consoleOutput.value += s + '\n' })
-    pyodide.value.setStderr({ batched: (s) => consoleOutput.value += '❌ ' + s + '\n' })
+    pyodide.value.setStdout({ batched: s => (consoleOutput.value += s + '\n') })
+    pyodide.value.setStderr({ batched: s => (consoleOutput.value += '❌ ' + s + '\n') })
 
+    console.log('======= PYODIDE INPUT =======\n' + code + '\n=============================')
     await pyodide.value.runPythonAsync(code)
 
     if (!consoleOutput.value.trim()) {
       consoleOutput.value = '✅ Код выполнен.'
     }
-
   } catch (err) {
     consoleOutput.value = `❌ Ошибка:\n${err}`
   } finally {
@@ -118,15 +290,17 @@ const runCode = async () => {
   }
 }
 
+
+// ====== INIT ======
 onMounted(() => {
   const blocks = props.task?.content?.blocks || []
   originalBlocks.value = blocks.map(block => ({
     ...block,
-    id: generateId()
+    id: generateId(),
+    indentLevel: 0
   }))
   shuffledBlocks.value = [...originalBlocks.value].sort(() => Math.random() - 0.5)
 
-  // 🔥 Стартуем подгрузку
   initPyodide()
 })
 </script>
@@ -172,7 +346,6 @@ onMounted(() => {
   min-height: 100px;
 }
 
-
 .code-block {
   font-family: monospace;
   background: transparent;
@@ -214,4 +387,10 @@ onMounted(() => {
 .block-list.highlighted {
   border-color: #db9410; /* Жёлтая рамка только для левой секции */
 }
+
+.code-block-wrapper.selected,
+.code-block.selected {
+  background: #535c70;
+}
+
 </style>

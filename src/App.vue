@@ -1,7 +1,7 @@
 <template>
-  <div class="app-layout">
+  <div class="app-layout" :class="{ 'no-sidebar': $route.meta.hideSidebar }">
     <!-- 🧱 Sidebar всегда сбоку -->
-    <Sidebar />
+    <Sidebar v-if="!$route.meta.hideSidebar" />
 
     <!-- Вся остальная часть страницы -->
     <div class="main-and-console">
@@ -49,7 +49,11 @@ html, body {
   flex-grow: 1;
   height: 100%;
   overflow: hidden;
-  padding-top: 60px; /* вот здесь — учитываем высоту шляпы */
+  padding-top: 0; /* по умолчанию НЕТ отступа */
+}
+
+.main-and-console.with-header {
+  padding-top: 60px; /* добавляем отступ, если есть шляпа */
 }
 
 .main-scroll-zone {
@@ -76,4 +80,13 @@ html, body {
 .fade-leave-to {
   opacity: 0;
 }
+
+.app-layout.no-sidebar .main-and-console {
+  padding-left: 0 !important;
+}
+
+.app-layout.no-sidebar {
+  flex-direction: column; /* или row, если надо */
+}
+
 </style>
