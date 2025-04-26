@@ -15,18 +15,26 @@ const routes = [
     path: '/courses',
     name: 'home',
     component: () => import('@/views/Courses.vue'),
-    meta: { title: 'Курсы'}
+    meta: { title: 'Курсы',
+      hasHeader: true
+    }
   },
   {
     path: '/tasks',
     name: 'tasks',
     component: () => import('@/views/Tasks.vue'),
-    meta: { title: 'Задания' }
+    meta: { title: 'Задания' ,
+      hasHeader: true
+    }
   },
   {
     path: '/courses/:id',
     name: 'course',
-    component: () => import('@/views/Tasks.vue') // или твой курс-компонент
+    component: () => import('@/views/Tasks.vue'),
+    meta: {
+      hasHeader: true
+    }
+     // или твой курс-компонент
     // meta здесь не нужен, так как будет динамически с бэка
   }
 ]

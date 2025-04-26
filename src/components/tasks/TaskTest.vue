@@ -1,11 +1,6 @@
 <template>
-  <div class="test-card" :style="{
-    '--bg': background_color,
-    '--border': border_color,
-    '--text': text_color,
-    '--kruglik': kruglik_size,
-  }">
-    <button class="close-button" @click="visible = false">×</button>
+  <div class="test-card">
+  
 
     <h2>{{ task?.title || 'Тест' }}</h2>
     <div class="kunt">
@@ -16,10 +11,6 @@
         :options="q.options"
         :model-value="answers[i]"
         @update:model-value="val => answers[i] = val"
-        :background_color="background_color"
-        :border_color="border_color"
-        :text_color="text_color"
-        :kruglik_size="kruglik_size"
        />
        <div class="under_kunt_for_button">
       <button class="submit-btn" :disabled="!canSubmit" @click="submitTest">Сдать</button>
@@ -42,9 +33,14 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, inject } from 'vue'
 import ManySelect from './testBlocks/ManySelect.vue'
 import axios from 'axios'
+
+const background_color = inject('background_color')
+const border_color = inject('border_color')
+const text_color = inject('text_color')
+const kruglik_size = inject('kruglik_size')
 
 const result = ref(null)
 
@@ -79,10 +75,6 @@ const props = defineProps({
   }
 })
 
-const background_color = "#ffffff"
-const border_color = "#8800cc"
-const text_color = "#000000"
-const kruglik_size = "16px"
 
 const visible = ref(true)
 const questions = ref([])
@@ -105,7 +97,7 @@ watch(
 </script>
   
   
-<style>
+<style scoped>
 
 .progress-bar {
   width: 100%;
