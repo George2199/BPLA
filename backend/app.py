@@ -130,6 +130,10 @@ def serve_course_image(filename):
 @app.route('/data/videos/<path:filename>')
 def serve_video(filename):
     return send_from_directory('data/videos', filename)
+    
+@app.route('/data/conspects/<path:filename>')
+def serve_conspect(filename):
+    return send_from_directory('data/conspects', filename, mimetype='text/markdown')
 
 if __name__ == '__main__':
     app.run(debug=True)
