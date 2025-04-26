@@ -4,6 +4,7 @@ import json
 
 IMG_PATH = "/data/imgs/"
 VIDEO_PATH = "/data/videos/"
+CONSPECT_PATH = "/data/conspects/"
 
 def clear_tables():
     with app.app_context():
@@ -61,6 +62,7 @@ def seed_courses():
         python_course.themes = [
             Theme(title="Тема 1: Основы синтаксиса", tasks=[
                 Task(title="Видео: Переменные", type="video"),
+                Task(title="Конспект: Переменные", type="conspect", content=CONSPECT_PATH + "conspect1.md"),
                 Task(title="Практика: Примитивы", type="practical")
             ]),
             Theme(title="Тема 2: Условия", tasks=[
