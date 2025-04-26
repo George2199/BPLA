@@ -100,7 +100,6 @@ onMounted(async () => {
 }
 
 .container {
-  margin-top:60px;
   display: flex;
   flex-wrap: wrap;
   gap: 80px; /* Расстояние между блоками */

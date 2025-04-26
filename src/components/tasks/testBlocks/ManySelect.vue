@@ -26,26 +26,18 @@
 </template>
 
 <script setup>
+
+import {inject} from 'vue'
+const background_color = inject('background_color')
+const border_color = inject('border_color')
+const text_color = inject('text_color')
+const kruglik_size = inject('kruglik_size')
+
 const props = defineProps({
   question: String,
   options: Array, // простой массив строк
   modelValue: Array,
-  background_color: {
-    type: String,
-    default: '#ffffff'
-  },
-  border_color: {
-    type: String,
-    default: '#8800cc'
-  },
-  text_color: {
-    type: String,
-    default: '#000000'
-  },
-  kruglik_size: {
-    type: String,
-    default: '16px'
-  }
+
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -74,7 +66,7 @@ function onChange(index, event) {
 .question-block{
   font-family: 'Unbounded', sans-serif;
   font-weight:700 !important;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   color: var(--text);
   padding: 10px;
   border-radius: 8px;
