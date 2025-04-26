@@ -109,14 +109,20 @@ def seed_courses():
                     content=json.dumps({
                         "description": "Собери правильный порядок строк для вывода 'Hello, World!'",
                         "blocks": [
-                            { "content": "print('Hello, World!')" },
-                            { "content": "def main():" },
-                            { "content": "main()" },
-                            { "content": "print('Hello, World!')" },
-                            { "content": "print('YyYyYYyYTataBye-bye, World!!!')"},
+                            { "content": "def main():", "type": "code" },
+                            { "content": "print('Hello, World!')", "type": "code" },
+                            { "content": "main()", "type": "code" },
+                            { 
+                                "type": "container",
+                                "label": "for i in range(5):",
+                                "children": [
+                                    { "content": "    print(i)", "type": "code" }
+                                ]
+                            },
+                            { "content": "print('Goodbye, World!')", "type": "code" }
                         ]
                     })
-                )
+                ),
             ])
         ]
 

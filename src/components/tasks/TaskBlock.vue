@@ -5,7 +5,7 @@
     </p>
 
     <div class="blocks-wrapper">
-      <!-- Ответ -->
+      <!-- ОТВЕТ -->
       <div class="section answer-section">
         <draggable
           v-model="answerBlocks"
@@ -14,20 +14,18 @@
           item-key="id"
         >
           <template #item="{ element }">
-            <div
-              class="code-block yellow-border code-block-wrapper"
-              :class="{ selected: selectedBlockId === element.id && selectedFromAnswer }"
-              @click="selectBlock(element.id, true)"
-            >
-              <div class="code-text">
-                {{ '\u00A0\u00A0\u00A0\u00A0'.repeat(element.indentLevel) + element.content }}
-              </div>
-            </div>
+            <BlockItem
+              :element="element"
+              :selectedBlockId="selectedBlockId"
+              :selectedFromAnswer="selectedFromAnswer"
+              @selectBlock="selectBlock"
+              fromAnswer
+            />
           </template>
         </draggable>
       </div>
 
-      <!-- Исходники -->
+      <!-- ИСХОДНИКИ -->
       <div class="section">
         <draggable
           :list="shuffledBlocks"
@@ -38,13 +36,12 @@
           :sort="false"
         >
           <template #item="{ element }">
-            <div
-              class="code-block white-border"
-              :class="{ selected: selectedBlockId === element.id && !selectedFromAnswer }"
-              @click="selectBlock(element.id, false)"
-            >
-              {{ element.content }}
-            </div>
+            <BlockItem
+              :element="element"
+              :selectedBlockId="selectedBlockId"
+              :selectedFromAnswer="selectedFromAnswer"
+              @selectBlock="selectBlock"
+            />
           </template>
         </draggable>
       </div>
@@ -56,10 +53,12 @@
   </div>
 </template>
 
+
 <script setup>
 import { ref, onMounted } from 'vue'
 import draggable from 'vuedraggable'
 import { consoleOutput } from '@/store/console'
+import BlockItem from './blockBlocks/BlockItem.vue'
 
 // ====== ПЕРЕМЕННЫЕ ======
 const props = defineProps({ task: Object })
@@ -79,15 +78,49 @@ function generateId() {
   return '_' + Math.random().toString(36).substr(2, 9)
 }
 
-const cloneBlock = (original) => ({
-  ...original,
-  id: generateId(),
-  indentLevel: original.indentLevel ?? 0
-})
+const cloneBlock = (original) => {
+  const clone = {
+    ...original,
+    id: generateId(),
+    indentLevel: original.indentLevel ?? 0
+  }
+
+  if (clone.type === 'container' && Array.isArray(clone.children)) {
+    clone.children = clone.children.map(child => cloneBlock(child))
+  }
+
+  return clone
+}
+
+const prepareBlock = (block, level = 0) => {
+  const newBlock = {
+    ...block,
+    id: generateId(),
+    indentLevel: level
+  }
+  if (block.type === 'container' && Array.isArray(block.children)) {
+    newBlock.children = block.children.map(child => prepareBlock(child, level + 1))
+  }
+  return newBlock
+}
 
 const selectBlock = (id, fromAnswer = true) => {
   selectedBlockId.value = id
   selectedFromAnswer.value = fromAnswer
+}
+
+const findBlockAndParent = (blocks, id) => {
+  for (let i = 0; i < blocks.length; i++) {
+    const block = blocks[i]
+    if (block.id === id) {
+      return { parent: blocks, index: i }
+    }
+    if (block.type === 'container' && block.children) {
+      const res = findBlockAndParent(block.children, id)
+      if (res) return res
+    }
+  }
+  return null
 }
 
 // ====== ЛОГИЧЕСКИЕ ======
@@ -95,8 +128,13 @@ const handleKey = (event) => {
   if (!selectedBlockId.value) return
 
   const fromAnswer = selectedFromAnswer.value
-  const currentList = fromAnswer ? answerBlocks.value : shuffledBlocks.value
-  const index = currentList.findIndex(b => b.id === selectedBlockId.value)
+  const blocksRoot = fromAnswer ? answerBlocks.value : shuffledBlocks.value
+  const result = findBlockAndParent(blocksRoot, selectedBlockId.value)
+
+  if (!result) return
+
+  const { parent: currentList, index } = result
+
   if (index === -1) return
 
   const isAlt = event.altKey
@@ -261,9 +299,22 @@ const runCode = async () => {
     return
   }
 
-  const code = answerBlocks.value
-    .map(b => '    '.repeat(b.indentLevel) + b.content)
-    .join('\n')
+  const buildCode = (blocks, baseIndent = 0) => {
+    let lines = []
+    for (const block of blocks) {
+      if (block.type === 'code') {
+        lines.push('    '.repeat(baseIndent + (block.indentLevel || 0)) + block.content)
+      } else if (block.type === 'container') {
+        lines.push('    '.repeat(baseIndent + (block.indentLevel || 0)) + block.label)
+        if (Array.isArray(block.children)) {
+          lines.push(...buildCode(block.children, baseIndent + 1))
+        }
+      }
+    }
+    return lines
+  }
+
+  const code = buildCode(answerBlocks.value).join('\n')
 
   if (!code.trim()) {
     consoleOutput.value = '⚠️ Нет кода для запуска.'
@@ -291,14 +342,11 @@ const runCode = async () => {
 }
 
 
+
 // ====== INIT ======
 onMounted(() => {
   const blocks = props.task?.content?.blocks || []
-  originalBlocks.value = blocks.map(block => ({
-    ...block,
-    id: generateId(),
-    indentLevel: 0
-  }))
+  originalBlocks.value = blocks.map(b => prepareBlock(b))
   shuffledBlocks.value = [...originalBlocks.value].sort(() => Math.random() - 0.5)
 
   initPyodide()

@@ -1,45 +1,50 @@
 <template>
-  <div class="app-container">
-    <Shlyapabar/>
+  <div class="app-container"
+  :style="{
+        '--bg': background_color,
+        '--border': border_color,
+        '--text': text_color,
+        '--kruglik': kruglik_size,
+        '--grad_clr_l': grad_color_left,
+        '--grad_clr_r': grad_color_right,
+      }">
+    <Shlyapabar />
 
-    <!-- Основной контент -->
     <div class="main-content">
       <div class="content-wrapper">
-        <!-- Меню курса -->
         <CourseMenu
           :themes="course?.themes || []"
           @select-task="setSelectedTask"
         />
 
-        <!-- Контентная область -->
         <div class="content-box">
+          <!-- Кнопка закрытия -->
           <button
-            v-if="selectedTask"
+            v-show="selectedTask"
             class="close-task"
-            @click="selectedTask = null"
-          >×</button>
-        
+            @click="clearSelectedTask"
+          >
+            ×
+          </button>
+
+          <!-- Контент таска -->
           <component
-            :is="componentsMap[selectedTask?.type]"
             v-if="selectedTask"
+            :is="componentsMap[selectedTask?.type]"
             :task="selectedTask"
           />
         </div>
-
-    
       </div>
     </div>
   </div>
 </template>
 
-
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, inject } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 
-import Shlyapabar from '@/components/Shlyapabar.vue';
-import Sidebar from '@/components/Sidebar.vue'
+import Shlyapabar from '@/components/Shlyapabar.vue'
 import CourseMenu from '@/components/CourseMenu.vue'
 
 import TaskVideo from '@/components/tasks/TaskVideo.vue'
@@ -49,6 +54,13 @@ import TaskSummary from '@/components/tasks/TaskSummary.vue'
 import TaskBlock from '@/components/tasks/TaskBlock.vue'
 
 const API_URL = import.meta.env.VITE_API_URL
+
+const background_color = inject('background_color')
+const border_color = inject('border_color')
+const text_color = inject('text_color')
+const kruglik_size = inject('kruglik_size')
+const grad_color_left = inject('grad_color_left')
+const grad_color_right = inject('grad_color_right')
 
 const route = useRoute()
 const courseId = route.params.id
@@ -60,11 +72,15 @@ const componentsMap = {
   test: TaskTest,
   practical: TaskPractical,
   summary: TaskSummary,
-  block: TaskBlock, // 🆕 Добавили!
+  block: TaskBlock,
 }
 
 const setSelectedTask = (task) => {
   selectedTask.value = task
+}
+
+const clearSelectedTask = () => {
+  selectedTask.value = null
 }
 
 onMounted(async () => {
@@ -78,21 +94,30 @@ onMounted(async () => {
 </script>
 
 
-<style>
+
+<style scoped>
 .h2 {
   margin-top: 0;
 }
 
 .close-task {
   position: absolute;
-  top: 5px;
-  right: 6px;
-  font-size: 26px;
-  color: white;
-  background: transparent;
-  border: none;
+  top: 12px;
+  right: 12px;
+  background: #ff3333;
+  color: transparent;
+  font-size: 24px;
+  font-weight: bold;
   cursor: pointer;
-  z-index: 5;
+  appearance: none;
+  width: var(--kruglik);
+  height: var(--kruglik);
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
   transition: transform 0.2s ease;
 }
 
@@ -101,7 +126,7 @@ onMounted(async () => {
   flex-grow: 1;
   display: flex;
   min-height: 100vh; /* 👈 вместо height: 100vh */
-  background: linear-gradient(to bottom right, #6a0dad, #2d033b);
+  background: linear-gradient(to bottom right, var(--grad_clr_l), var(--grad_clr_r));
   color: white;
 }
 
@@ -127,7 +152,7 @@ onMounted(async () => {
 
 .content-box {
   position: relative;
-  background: #8D06C3;
+  background: #802dbb;
   border-radius: 8px;
   min-width: 300px;
   width: 100%;
