@@ -60,7 +60,7 @@ const selectTask = (task) => {
 /* Кнопки тем */
 .topic-button {
   width: 100%;
-  background: #6a0dad;
+  background: var(--topic_button_color);
   color: white;
   padding: 10px;
   border: none;
@@ -74,7 +74,7 @@ const selectTask = (task) => {
 }
 
 .topic-button:hover {
-  background: #7d1ba5;
+  background: var(--topic_button_color_hover);
 }
 
 /* Список уроков */
@@ -86,7 +86,7 @@ const selectTask = (task) => {
 /* Кнопки уроков */
 .lesson-button {
   width: 100%;
-  background: #802dbb;
+  background: var(--lesson_button);
   color: white;
   padding: 8px;
   border: none;
@@ -98,6 +98,6 @@ const selectTask = (task) => {
 }
 
 .lesson-button:hover {
-  background: #9c3ddb;
+  background: var(--lesson_button_hover);
 }
 </style>

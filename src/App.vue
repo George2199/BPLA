@@ -1,20 +1,8 @@
 <template>
-  <div class="app-layout"
-  :class="{ 'no-sidebar': $route.meta.hideSidebar }"
-  :style="{
-    '--bg': background_color,
-    '--border': border_color,
-    '--text': text_color,
-    '--kruglik': kruglik_size,
-    '--grad_clr_l': grad_color_left,
-    '--grad_clr_r': grad_color_right,
-  }">
-    <!-- 🧱 Sidebar всегда сбоку -->
+  <div class="app-layout" :class="{ 'no-sidebar': $route.meta.hideSidebar }">
     <Sidebar v-if="!$route.meta.hideSidebar" />
 
-    <!-- Вся остальная часть страницы -->
     <div class="main-and-console" :class="{ 'with-header': $route.meta.hasHeader }">
-      <!-- Скроллим здесь -->
       <div class="main-scroll-zone">
         <router-view :key="$route.fullPath" v-slot="{ Component }">
           <transition name="fade" mode="out-in">
@@ -33,22 +21,18 @@
 <script setup>
 import Sidebar from '@/components/Sidebar.vue'
 import { consoleOutput, consoleVisible } from '@/store/console'
-import { provide } from 'vue'
+import { onMounted } from 'vue'
+import { std } from '@/themes/themes'
 
+function applyTheme(theme) {
+  for (const [key, value] of Object.entries(theme)) {
+    document.documentElement.style.setProperty(`--${key}`, value)
+  }
+}
 
-const background_color = "#ffffff"
-const border_color = "#8800cc"
-const text_color = "#000000"
-const kruglik_size = "16px"
-const grad_color_left = "#581170"
-const grad_color_right = "#1D012A"
-
-provide('background_color', background_color)
-provide('border_color', border_color)
-provide('text_color', text_color)
-provide('kruglik_size', kruglik_size)
-provide('grad_color_left', grad_color_left)
-provide('grad_color_right', grad_color_right)
+onMounted(() => {
+  applyTheme(std)
+})
 
 </script>
 
