@@ -5,12 +5,6 @@
       v-for="(option, index) in options"
       :key="index"
       class="option"
-      :style="{
-        '--bg': background_color,
-        '--border': border_color,
-        '--text': text_color,
-        '--kruglik': kruglik_size,
-      }"
     >
     <input
       type="checkbox"
@@ -26,13 +20,6 @@
 </template>
 
 <script setup>
-
-import {inject} from 'vue'
-const background_color = inject('background_color')
-const border_color = inject('border_color')
-const text_color = inject('text_color')
-const kruglik_size = inject('kruglik_size')
-
 const props = defineProps({
   question: String,
   options: Array, // простой массив строк
@@ -67,7 +54,7 @@ function onChange(index, event) {
   font-family: 'Unbounded', sans-serif;
   font-weight:700 !important;
   margin-bottom: 10px;
-  color: var(--text);
+  color: var(--text_color);
   padding: 10px;
   border-radius: 8px;
 }
@@ -80,7 +67,7 @@ label {
   }
 
 .option {
-  color: var(--text);
+  color: var(--text_color);
   display: flex;
   align-items: baseline;
   gap: 10px;
@@ -92,11 +79,11 @@ label {
 
 input[type="checkbox"] {
   appearance: none;
-  width: var(--kruglik);
-  height: var(--kruglik);
-  border: 2px solid var(--border);
+  width: var(--kruglik_size);
+  height: var(--kruglik_size);
+  border: 2px solid var(--border_color);
   border-radius: 50%;
-  background-color: var(--bg);
+  background-color: var(--background_color);
   cursor: pointer;
   position: relative;
   flex-shrink: 0;
@@ -104,6 +91,6 @@ input[type="checkbox"] {
 }
 
 input[type="checkbox"]:checked {
-  background-color: var(--border); /* ← вот тут можно менять цвет внутри кружка */
+  background-color: var(--border_color); /* ← вот тут можно менять цвет внутри кружка */
 }
 </style>

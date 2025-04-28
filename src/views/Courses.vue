@@ -18,7 +18,7 @@ import CoursesIcons from '@/components/CoursesIcons.vue';
   display: flex;
   width: 100%;
   height: 100%;
-  background: linear-gradient(to bottom right, #581170, #1D012A);
+  background: linear-gradient(to bottom right, var(--grad_color_left), var(--grad_color_right));
   color: white;
   margin-top: 0;
 }

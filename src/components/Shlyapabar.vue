@@ -10,12 +10,13 @@
 <script setup>
 import homeIcon from '@/assets/icons/menu.png'
 import { useRoute, onBeforeRouteUpdate } from 'vue-router'
-import { computed, ref, watchEffect } from 'vue'
+import { computed, ref, watchEffect, inject } from 'vue'
 import axios from 'axios'
 
 const icons = [homeIcon]
 const route = useRoute()
 const courseTitle = ref('')
+
 
 // Заголовок по умолчанию из meta
 const pageTitle = computed(() => {
@@ -52,7 +53,8 @@ watchEffect(() => {
     left: 0;
     right: 0;
     height: 60px;
-    background: linear-gradient(90deg, #8D06C3, #1D012A);
+    background: linear-gradient(90deg, var(--shlyapabar_left_color),
+      var(--shlyapabar_right_color));
     display: flex;
     align-items: center;
     z-index: 9999; /* Поверх всего! */

@@ -37,6 +37,7 @@ import chatIcon from '@/assets/icons/chat.png';
 import { toggleConsole } from '@/store/console'
 
 const icons = [coursesIcon, codeIcon, commandIcon, simulatorIcon, chatIcon];
+
 </script>
 
 
@@ -45,7 +46,7 @@ const icons = [coursesIcon, codeIcon, commandIcon, simulatorIcon, chatIcon];
   margin-top: 60px; /* ⚠️ соответствует высоте .shlyapabar */
   width: 60px;
   height: calc(100vh - 60px); /* тоже учли шапку */
-  background: #8D06C3;
+  background: var(--sidebar_color);
   display: flex;
   flex-direction: column;
   align-items: center;

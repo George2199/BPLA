@@ -80,8 +80,8 @@ onMounted(async () => {
   width: 100%;
   background: linear-gradient(
     to bottom,
-    rgb(0, 240, 255, 1) 25%,
-    rgb(153, 0, 255) 80%
+    var(--progress_bar_top) 25%,
+    var(--progress_bar_bottom) 80%
   );
   transition: height 0.3s ease-in-out;
 }
@@ -91,8 +91,8 @@ onMounted(async () => {
   background: linear-gradient(
     to bottom,
     rgba(0, 238, 255, 0) 2%,
-    rgba(0, 240, 255, 1) 25%,
-    rgb(153, 0, 255) 80%
+    var(--progress_bar_top) 25%,
+    var(--progress_bar_bottom) 80%
   );
   transition: height 0.3s ease-in-out;
   /* box-shadow: 0 0 10px #00f0ff, 0 0 20px #9a00ff; */
@@ -115,9 +115,9 @@ onMounted(async () => {
     overflow: hidden; /* чтобы изображение не выходило за границы */
     font-family: Arial, sans-serif;
     box-shadow:
-    0 0 10px 2px rgba(154, 0, 255, 0.2),
-    0 0 20px 4px rgba(0, 240, 255, 0.2),
-    inset 0 0 10px rgba(154, 0, 255, 0.1);
+    0 0 10px 2px var(--card_bottom),
+    0 0 20px 4px var(--card_middle),
+    inset 0 0 10px var(--card_top);
     cursor: pointer;
     transition: box-shadow 0.4s ease;
     text-decoration: none;
@@ -126,9 +126,9 @@ onMounted(async () => {
 
 .card:hover {
     box-shadow:
-    0 0 10px 2px rgba(153, 0, 255, 0.753),
-    0 0 20px 4px rgba(0, 238, 255, 0.623),
-    inset 0 0 10px rgba(153, 0, 255, 0.459);
+    0 0 10px 2px var(--card_hover_bottom),
+    0 0 20px 4px var(--card_hover_middle),
+    inset 0 0 10px var(--card_hover_top);
 }
 
 .card-image {
