@@ -1,13 +1,5 @@
 <template>
-  <div class="app-container"
-  :style="{
-        '--bg': background_color,
-        '--border': border_color,
-        '--text': text_color,
-        '--kruglik': kruglik_size,
-        '--grad_clr_l': grad_color_left,
-        '--grad_clr_r': grad_color_right,
-      }">
+  <div class="app-container">
     <Shlyapabar />
 
     <div class="main-content">
@@ -40,7 +32,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, inject } from 'vue'
+import { ref, onMounted, } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 
@@ -55,12 +47,6 @@ import TaskBlock from '@/components/tasks/TaskBlock.vue'
 
 const API_URL = import.meta.env.VITE_API_URL
 
-const background_color = inject('background_color')
-const border_color = inject('border_color')
-const text_color = inject('text_color')
-const kruglik_size = inject('kruglik_size')
-const grad_color_left = inject('grad_color_left')
-const grad_color_right = inject('grad_color_right')
 
 const route = useRoute()
 const courseId = route.params.id
@@ -110,8 +96,8 @@ onMounted(async () => {
   font-weight: bold;
   cursor: pointer;
   appearance: none;
-  width: var(--kruglik);
-  height: var(--kruglik);
+  width: var(--kruglik_size);
+  height: var(--kruglik_size);
   border: none;
   border-radius: 50%;
   display: flex;
@@ -126,7 +112,7 @@ onMounted(async () => {
   flex-grow: 1;
   display: flex;
   min-height: 100vh; /* 👈 вместо height: 100vh */
-  background: linear-gradient(to bottom right, var(--grad_clr_l), var(--grad_clr_r));
+  background: linear-gradient(to bottom right, var(--grad_color_left), var(--grad_color_right));
   color: white;
 }
 
@@ -152,7 +138,7 @@ onMounted(async () => {
 
 .content-box {
   position: relative;
-  background: #802dbb;
+  background: var(--border_color);
   border-radius: 8px;
   min-width: 300px;
   width: 100%;

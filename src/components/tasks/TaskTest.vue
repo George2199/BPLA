@@ -16,7 +16,6 @@
       <button class="submit-btn" :disabled="!canSubmit" @click="submitTest">Сдать</button>
 
     </div>
-
     </div>
 
    
@@ -33,14 +32,9 @@
 </template>
 
 <script setup>
-import { ref, watch, computed, inject } from 'vue'
+import { ref, watch, computed, } from 'vue'
 import ManySelect from './testBlocks/ManySelect.vue'
 import axios from 'axios'
-
-const background_color = inject('background_color')
-const border_color = inject('border_color')
-const text_color = inject('text_color')
-const kruglik_size = inject('kruglik_size')
 
 const result = ref(null)
 
@@ -120,7 +114,7 @@ watch(
   bottom: 15px;
   right: 0px;
 
-  background: #7000cc;
+  background: var(--grad_color_right);
   color: white;
   font-weight: bold;
   border: none;
@@ -143,9 +137,9 @@ watch(
   color: transparent;
   cursor: pointer;
   appearance: none;
-  width: var(--kruglik);
-  height: var(--kruglik);
-  border: 1px solid var(--bg);
+  width: var(--kruglik_size);
+  height: var(--kruglik_size);
+  border: 1px solid var(--background_color);
   border-radius: 50%;
 }
 
@@ -158,7 +152,7 @@ watch(
 
 .kunt {
   flex: 1;
-  background: var(--bg);
+  background: var(--background_color);
   overflow-y: auto;
   padding-right: 10px;
   scrollbar-gutter: stable;
@@ -177,9 +171,9 @@ watch(
 }
 
 .kunt::-webkit-scrollbar-thumb {
-  background-color: var(--border);
+  background-color: var(--border_color);
   border-radius: 15px;
-  border: 4px solid var(--bg);
+  border: 4px solid var(--background_color);
 }
 
 .kunt::-webkit-scrollbar-thumb:hover {
@@ -190,7 +184,7 @@ watch(
   position: relative;
   
   background: transparent;
-  color: var(--bg);
+  color: var(--background_color);
 
   padding: 24px 32px;
   max-height: 90vh;
@@ -212,7 +206,7 @@ h2 {
   padding: 6px;
   font-size: 14px;
   border-radius: 5px;
-  border: 2px solid var(--border);
+  border: 2px solid var(--border_color);
   outline: none;
 }
 
