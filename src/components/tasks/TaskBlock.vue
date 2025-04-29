@@ -55,7 +55,9 @@
 
 
 <script setup>
+import axios from 'axios'
 import { ref, onMounted } from 'vue'
+import { loadPyodide } from 'pyodide'
 import draggable from 'vuedraggable'
 import { consoleOutput } from '@/store/console'
 import BlockItem from './blockBlocks/BlockItem.vue'
@@ -280,25 +282,17 @@ const decreaseIndent = (block) => {
 
 // ====== PYODIDE ИНИЦИАЛИЗАЦИЯ ======
 const initPyodide = async () => {
-  if (window.__pyodide) return
-  try {
-    consoleOutput.value = '⏳ Загружаем Pyodide...'
-    const instance = await window.loadPyodide({ indexURL: '/pyodide/' })
-    window.__pyodide = instance
-    pyodide.value = instance
-    pyodideReady.value = true
-    consoleOutput.value = '✅ Pyodide готов!'
-  } catch (err) {
-    consoleOutput.value = '❌ Ошибка загрузки Pyodide: ' + err
-  }
+  if (pyodideReady.value && pyodide.value) return pyodide.value
+
+  pyodide.value = await loadPyodide({
+    indexURL: '/pyodide/',
+  })
+  pyodideReady.value = true
+
+  return pyodide.value
 }
 
 const runCode = async () => {
-  if (!pyodideReady.value) {
-    consoleOutput.value = '⚠️ Pyodide ещё не готов.'
-    return
-  }
-
   const buildCode = (blocks, baseIndent = 0) => {
     let lines = []
     for (const block of blocks) {
@@ -317,7 +311,7 @@ const runCode = async () => {
   const code = buildCode(answerBlocks.value).join('\n')
 
   if (!code.trim()) {
-    consoleOutput.value = '⚠️ Нет кода для запуска.'
+    consoleOutput.value = '⚠️ нет кода для запуска.'
     return
   }
 
@@ -325,32 +319,24 @@ const runCode = async () => {
     isRunning.value = true
     consoleOutput.value = ''
 
-    pyodide.value.setStdout({ batched: s => (consoleOutput.value += s + '\n') })
-    pyodide.value.setStderr({ batched: s => (consoleOutput.value += '❌ ' + s + '\n') })
-
-    console.log('======= PYODIDE INPUT =======\n' + code + '\n=============================')
-    await pyodide.value.runPythonAsync(code)
-
-    if (!consoleOutput.value.trim()) {
-      consoleOutput.value = '✅ Код выполнен.'
-    }
-  } catch (err) {
-    consoleOutput.value = `❌ Ошибка:\n${err}`
+    const response = await axios.post('http://localhost:5000/execute', { code })
+    consoleOutput.value = response.data.output || '✅ код выполнен.'
+  } catch (error) {
+    consoleOutput.value = `❌ ошибка:\n${error.response?.data?.error || error.message}`
   } finally {
     isRunning.value = false
   }
 }
 
-
-
 // ====== INIT ======
-onMounted(() => {
+onMounted(async () => {
   const blocks = props.task?.content?.blocks || []
   originalBlocks.value = blocks.map(b => prepareBlock(b))
   shuffledBlocks.value = [...originalBlocks.value].sort(() => Math.random() - 0.5)
 
-  initPyodide()
+  await initPyodide()
 })
+
 </script>
 
 

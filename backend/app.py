@@ -5,6 +5,8 @@ from flask_migrate import Migrate
 from models import db, Role, Course, Theme, Task
 from config import Config
 import json
+import io
+import contextlib
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -94,8 +96,6 @@ def get_courses():
             ]
         } for c in courses
     ])
-
-
     
 @app.route('/courses/<int:id>', methods=['GET'])
 def get_course_by_id(id):
@@ -222,4 +222,20 @@ def submit_test():
     })
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="127.0.0.1", port=5000, debug=True)
+
+@app.route('/execute', methods=['POST'])
+def execute_code():
+    data = request.get_json()
+    code = data.get('code', '')
+
+    stdout = io.StringIO()
+    stderr = io.StringIO()
+
+    try:
+        with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+            exec(code, {})  # исполняем код безопасно
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+    return jsonify({'output': stdout.getvalue()})
