@@ -79,33 +79,6 @@ def run_migrations():
     if result.stderr:
         print("⚠️ Migration errors:\n", result.stderr)
 
-def download_pyodide():
-    print("📡 Checking Pyodide...")
-
-    base_url = "https://cdn.jsdelivr.net/pyodide/v0.27.5/full/"
-    files = [
-        "pyodide.js",
-        "pyodide.asm.js",
-        "pyodide.asm.wasm",
-        "python_stdlib.zip",
-        "pyodide-lock.json"  # ✅ Вот этот файл тебя сейчас убивает
-    ]
-    target_dir = os.path.join(os.path.dirname(__file__), "..", "public", "pyodide")
-    os.makedirs(target_dir, exist_ok=True)
-
-    for filename in files:
-        local_path = os.path.join(target_dir, filename)
-        if not os.path.exists(local_path):
-            print(f"⬇️ Downloading {filename}...")
-            try:
-                urllib.request.urlretrieve(base_url + filename, local_path)
-                print(f"✅ Saved: {local_path}")
-            except Exception as e:
-                print(f"❌ Failed to download {filename}: {e}")
-        else:
-            print(f"✔️ Already exists: {filename}")
-
 if __name__ == "__main__":
     create_user_and_db()
     run_migrations()
-    download_pyodide()
