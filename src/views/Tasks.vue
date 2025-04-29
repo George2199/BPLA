@@ -40,6 +40,7 @@ import Shlyapabar from '@/components/Shlyapabar.vue'
 import CourseMenu from '@/components/CourseMenu.vue'
 
 import TaskVideo from '@/components/tasks/TaskVideo.vue'
+import TaskConspect from '@/components/tasks/TaskConspect.vue'
 import TaskTest from '@/components/tasks/TaskTest.vue'
 import TaskPractical from '@/components/tasks/TaskPractical.vue'
 import TaskSummary from '@/components/tasks/TaskSummary.vue'
@@ -59,6 +60,7 @@ const componentsMap = {
   practical: TaskPractical,
   summary: TaskSummary,
   block: TaskBlock,
+  conspect: TaskConspect,
 }
 
 const setSelectedTask = (task) => {
