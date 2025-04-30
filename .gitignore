@@ -44,4 +44,3 @@ migrations/versions/
 *.tar.gz
 *.zip
 *.bak
-*.exe
