@@ -8,7 +8,7 @@
     "dev": "concurrently \"cross-env FLASK_APP=backend/app.py flask run\" \"vite\"",
     "electron:start": "wait-on http://localhost:5173 && cross-env VITE_DEV_SERVER_URL=http://localhost:5173 electron .",
     "electron:all": "concurrently \"cross-env FLASK_APP=backend/app.py flask run\" \"vite\" \"npm run electron:start\"",
-    "build": "vite build",
+    "build": "vite build && electron-builder",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -27,10 +27,25 @@
     "concurrently": "^9.1.2",
     "cross-env": "^7.0.3",
     "electron": "^36.0.0",
+    "electron-builder": "^26.0.12",
     "vite": "^6.1.0",
     "vite-plugin-electron": "^0.29.0",
     "vite-plugin-top-level-await": "^1.5.0",
     "vite-plugin-vue-devtools": "^7.7.2",
     "wait-on": "^8.0.3"
+  },
+  "build": {
+    "appId": "com.aerocosmos.app",
+    "productName": "AeroCosmos",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "dist/**",
+      "electron/**"
+    ],
+    "win": {
+      "target": "portable"
+    }
   }
 }
