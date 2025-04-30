@@ -44,3 +44,7 @@ migrations/versions/
 *.tar.gz
 *.zip
 *.bak
+*.exe
+dist/
+AeroCosmos 0.0.0.exe
+node_modules/
