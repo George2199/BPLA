@@ -11,12 +11,12 @@ function createWindow() {
     },
   });
 
-  if (process.env.VITE_DEV_SERVER_URL || process.env.NODE_ENV === 'development') {
-    // Для разработки — подключаемся к vite dev server
+  const isDev = process.env.VITE_DEV_SERVER_URL || process.env.NODE_ENV === 'development';
+
+  if (isDev) {
     win.loadURL('http://localhost:5173');
     win.webContents.openDevTools();
   } else {
-    // Для продакшена — подгружаем файл
     win.loadFile(path.join(__dirname, '../dist/index.html'));
   }
 }
@@ -30,7 +30,5 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+  if (process.platform !== 'darwin') app.quit();
 });
