@@ -1,0 +1,21 @@
+[33m00fe51b[m[33m ([m[1;36mHEAD -> [m[1;32mprod[m[33m)[m HEAD@{0}: reset: moving to HEAD^
+[33m9818449[m HEAD@{1}: reset: moving to HEAD~2
+[33mc987fae[m HEAD@{2}: reset: moving to HEAD^
+[33me36a30a[m HEAD@{3}: commit: gitignore exe
+[33mc987fae[m HEAD@{4}: commit: Update DB to SQLite
+[33m394a276[m[33m ([m[1;31morigin/artem_pizdec[m[33m, [m[1;32martem_pizdec[m[33m)[m HEAD@{5}: checkout: moving from artem_pizdec to prod
+[33m394a276[m[33m ([m[1;31morigin/artem_pizdec[m[33m, [m[1;32martem_pizdec[m[33m)[m HEAD@{6}: commit: electron builds
+[33m9818449[m HEAD@{7}: commit: Conspects, Electron, .exe Installer
+[33m00fe51b[m[33m ([m[1;36mHEAD -> [m[1;32mprod[m[33m)[m HEAD@{8}: commit: Merge checkings
+[33m4365f5c[m HEAD@{9}: commit (merge): Merge branch 'conspect' into artem_pizdec
+[33md6e4179[m HEAD@{10}: checkout: moving from conspect to artem_pizdec
+[33m5fd6b8f[m[33m ([m[1;31morigin/conspect[m[33m, [m[1;32mconspect[m[33m)[m HEAD@{11}: checkout: moving from artem_pizdec to conspect
+[33md6e4179[m HEAD@{12}: pull: Fast-forward
+[33mf562671[m HEAD@{13}: commit: after merge
+[33m67579b9[m HEAD@{14}: commit (merge): Merge remote-tracking branch 'origin/checking' into artem_pizdec
+[33mc36387d[m HEAD@{15}: commit: Added shortcuts
+[33m7368dbe[m HEAD@{16}: commit: Repair sidebar shlyapabar
+[33m251ff4f[m HEAD@{17}: commit: Blocks: day 3. Adding button-console. Start conflicts with sidebar and menu buttons. Refactored Pyodide-loading logic
+[33m29be76d[m HEAD@{18}: commit: gitignore
+[33m7a251dd[m HEAD@{19}: commit: Blocks: day 1
+[33me9293bc[m HEAD@{20}: checkout: moving from master to artem_pizdec

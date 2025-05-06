@@ -57,7 +57,6 @@
 <script setup>
 import axios from 'axios'
 import { ref, onMounted } from 'vue'
-import { loadPyodide } from 'pyodide'
 import draggable from 'vuedraggable'
 import { consoleOutput } from '@/store/console'
 import BlockItem from './blockBlocks/BlockItem.vue'
@@ -70,10 +69,6 @@ const answerBlocks = ref([])
 const selectedBlockId = ref(null)
 const selectedFromAnswer = ref(true)
 const isRunning = ref(false)
-
-const pyodide = ref(window.__pyodide || null)
-const pyodideReady = ref(!!window.__pyodide)
-
 
 // ====== ВСПОМОГАТЕЛЬНЫЕ ======
 function generateId() {
@@ -279,19 +274,6 @@ const decreaseIndent = (block) => {
   if (block.indentLevel > 0) block.indentLevel--
 }
 
-
-// ====== PYODIDE ИНИЦИАЛИЗАЦИЯ ======
-const initPyodide = async () => {
-  if (pyodideReady.value && pyodide.value) return pyodide.value
-
-  pyodide.value = await loadPyodide({
-    indexURL: '/pyodide/',
-  })
-  pyodideReady.value = true
-
-  return pyodide.value
-}
-
 const runCode = async () => {
   const buildCode = (blocks, baseIndent = 0) => {
     let lines = []
@@ -333,8 +315,6 @@ onMounted(async () => {
   const blocks = props.task?.content?.blocks || []
   originalBlocks.value = blocks.map(b => prepareBlock(b))
   shuffledBlocks.value = [...originalBlocks.value].sort(() => Math.random() - 0.5)
-
-  await initPyodide()
 })
 
 </script>

@@ -1,6 +1,15 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
 
+const fs = require('fs');
+const logFile = path.join(app.getPath('userData'), 'electron-log.txt');
+const logStream = fs.createWriteStream(logFile, { flags: 'a' });
+
+console.log = (...args) => {
+  logStream.write(args.map(String).join(' ') + '\n');
+};
+console.error = console.log;
+
 function createWindow() {
   const win = new BrowserWindow({
     width: 1200,
@@ -17,7 +26,7 @@ function createWindow() {
     win.loadURL('http://localhost:5173');
     win.webContents.openDevTools();
   } else {
-    win.loadFile(path.join(__dirname, '../dist/index.html'));
+    win.loadFile(path.join(__dirname, '/dist/index.html'));
   }
 }
 
