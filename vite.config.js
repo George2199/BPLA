@@ -8,9 +8,6 @@ export default defineConfig({
   define: {
     'process.env': {}, // чтобы не падали node-зависимости
   },
-  optimizeDeps: {
-    exclude: ['pyodide'], // отключаем оптимизацию для pyodide
-  },
   plugins: [
     vue(),
     vueDevTools(),
