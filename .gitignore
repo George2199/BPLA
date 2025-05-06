@@ -4,9 +4,6 @@ dist/
 .vite/
 *.log
 
-# 👉 Pyodide (если руками качаешь — оставляй)
-public/pyodide/
-
 # 👉 Python stuff
 __pycache__/
 *.py[cod]
