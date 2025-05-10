@@ -9,7 +9,7 @@
     "electron:start": "wait-on http://localhost:5173 && cross-env VITE_DEV_SERVER_URL=http://localhost:5173 electron .",
     "electron:all": "concurrently \"cross-env USE_SQLITE=1 FLASK_APP=backend/app.py flask run\" \"vite\" \"npm run electron:start\"",
     "build": "npm run clean && vite build && electron-builder",
-    "build:win": "npm run clean && vite build && electron-builder --win --config.extraMetadata.debug=true --config.forceCodeSigning=false --config.win.sign=null",
+    "build:win": "npm run clean && vite build && electron-builder --win --config.extraMetadata.debug=true --config.forceCodeSigning=false",
     "preview": "vite preview",
     "clean": "rimraf dist"
   },
@@ -52,8 +52,8 @@
         "to": "backend/data"
       },
       {
-        "from": "db.sqlite3",
-        "to": "db.sqlite3"
+        "from": "backend/instance",
+        "to": "backend/instance"
       },
       {
         "from": "backend/dist/backend_server.exe",

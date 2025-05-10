@@ -1,28 +1,48 @@
-from flask import Flask, jsonify, request
-from flask import send_from_directory
+from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from flask_migrate import Migrate
 from models import db, Role, Course, Theme, Task
-from config import Config
-import json
-import io
-import contextlib
-import sys, os
+from config import BaseConfig
+import json, io, contextlib, sys, os
 
+# Определяем пути
+if getattr(sys, 'frozen', False):
+    BASE_DIR = os.path.dirname(sys.executable)
+else:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+DATA_DIR = os.path.join(BASE_DIR, 'data')
+os.makedirs(DATA_DIR, exist_ok=True)
+db_path = os.path.join(DATA_DIR, 'app.db')
+
+# Создаем Flask app
 app = Flask(__name__)
-app.config.from_object(Config)
+app.config.from_object(BaseConfig)
+app.config["SQLALCHEMY_DATABASE_URI"] = BaseConfig.get_sqlite_uri(db_path)
 
+# Инициализация
 db.init_app(app)
 migrate = Migrate(app, db)
 
-if getattr(sys, 'frozen', False):
-    BASE_DIR = sys._MEIPASS  # Только внутри .exe
-else:
-    BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
-DATA_DIR = os.path.join(BASE_DIR, 'data')
+with open("db_debug_path.log", "w", encoding="utf-8") as f:
+    f.write(f"[DEBUG] DB WILL BE LOADED FROM: {db_path}\n")
 
-CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
+if not os.path.exists(db_path):
+    print("[INFO] Database not found. Initializing...")
+
+    with app.app_context():
+        db.create_all()
+        try:
+            import seed
+            seed.clear_tables()
+            seed.seed_roles()
+            seed.seed_courses()
+            print("[INFO] Initialization complete.")
+        except Exception as e:
+            print(f"[ERROR] Initialization failed: {e}")
+
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 def parse_content(content):
     try:

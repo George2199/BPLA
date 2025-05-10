@@ -27,6 +27,7 @@ import { toDisplayString } from 'vue';
 import GradientBar from '@/components/GradientBar.vue';
 </script>
 
+
 <script>
 export default {
   data() {

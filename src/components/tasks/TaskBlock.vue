@@ -58,7 +58,7 @@
 import axios from 'axios'
 import { ref, onMounted } from 'vue'
 import draggable from 'vuedraggable'
-import { consoleOutput } from '@/store/console'
+import { consoleOutput, showConsole } from '@/store/console'
 import BlockItem from './blockBlocks/BlockItem.vue'
 
 // ====== ПЕРЕМЕННЫЕ ======
@@ -296,7 +296,6 @@ const runCode = async () => {
     consoleOutput.value = '⚠️ нет кода для запуска.'
     return
   }
-
   try {
     isRunning.value = true
     consoleOutput.value = ''
@@ -307,6 +306,7 @@ const runCode = async () => {
     consoleOutput.value = `❌ ошибка:\n${error.response?.data?.error || error.message}`
   } finally {
     isRunning.value = false
+    showConsole()
   }
 }
 
