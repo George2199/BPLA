@@ -20,8 +20,8 @@
 
 <script setup>
 import Sidebar from '@/components/Sidebar.vue'
-import { consoleOutput, consoleVisible } from '@/store/console'
-import { onMounted } from 'vue'
+import { consoleOutput, consoleVisible, toggleConsole, hideConsole } from '@/store/console'
+import { onMounted, onBeforeUnmount } from 'vue'
 import { std } from '@/themes/themes'
 
 function applyTheme(theme) {
@@ -30,8 +30,35 @@ function applyTheme(theme) {
   }
 }
 
+
 onMounted(() => {
   applyTheme(std)
+
+  const keyListener = (e) => {
+    const tag = e.target.tagName?.toLowerCase()
+    const isTyping = ['input', 'textarea'].includes(tag) || e.target.isContentEditable
+
+    // Esc закрывает, если не в поле ввода
+    if (e.key === 'Escape' && !isTyping) {
+      hideConsole()
+    }
+
+    // Ctrl + ~ (Backquote) переключает консоль
+    if (e.ctrlKey && e.code === 'Backquote') {
+      e.preventDefault()
+      toggleConsole()
+    }
+  }
+
+  window.addEventListener('keydown', keyListener, true)
+  window._keyListener = keyListener
+})
+
+onBeforeUnmount(() => {
+  if (window._escListener) {
+    window.removeEventListener('keydown', window._escListener)
+    delete window._escListener
+  }
 })
 
 </script>
