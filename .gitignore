@@ -1,47 +1,53 @@
 # 👉 Node/Vite
 node_modules/
-dist/
+dist/                       # vite-выход и electron-builder output
 .vite/
 *.log
 
-# 👉 Python stuff
+# 👉 Electron
+.cacheelectron-builder/
+installer.iss
+install.ps1
+start_app.bat
+start_backend.bat
+*.exe
+
+# 👉 Python
 __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
 *.so
 *.egg-info/
+venv/
 env/
 .venv/
-venv/
 .Python
 
-# 👉 Env & Secrets
+# 👉 Flask / PyInstaller
+backend/dist/               # PyInstaller build (исходники backend_server.exe)
+backend/build/              # PyInstaller build cache
+backend/__pycache__/
+backend/instance/           # SQLite, seed и runtime файлы
+*.spec                      # PyInstaller .spec файлы
+*.zip                       # архивы с exe
+
+# 👉 Базы данных
+*.db
+*.sqlite*
+db_debug_path.log
+
+# 👉 Env & secrets
 .env
 *.env.*
 
-# 👉 OS и редактор
-.DS_Store
-Thumbs.db
+# 👉 IDE / OS / редактор
 .vscode/
 .idea/
-
-# 👉 SQLite / локальные БД
-*.db
-*.sqlite
-*.sqlite3
-
-# 👉 Migrations (если alembic используется)
-migrations/versions/
-
-# 👉 VSCode debug
+.DS_Store
+Thumbs.db
 *.code-workspace
 
-# 👉 Build scripts
-*.tar.gz
-*.zip
-*.bak
-*.exe
-dist/
-AeroCosmos 0.0.0.exe
-node_modules/
+# 👉 Optional: Pyodide (если есть)
+public/pyodide/
+node_modules
