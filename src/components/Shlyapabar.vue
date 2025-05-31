@@ -53,22 +53,23 @@ watchEffect(() => {
     left: 0;
     right: 0;
     height: 60px;
-    background: linear-gradient(90deg, var(--shlyapabar_left_color),
-      var(--shlyapabar_right_color));
+    background: linear-gradient(90deg, var(--shlyapabar_left_color), var(--shlyapabar_right_color));
     display: flex;
     align-items: center;
-    z-index: 9999; /* Поверх всего! */
+    z-index: 9999;
     box-sizing: border-box;
   }
 
   
   .shlyapabar-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
     color: white;
-    font-size: 22px;
+    font-size: 28px;
     font-weight: bold;
     letter-spacing: 1px;
     margin: 0;
-    padding-left: 20px;
   }
 
   .sidebar-button {
@@ -79,7 +80,7 @@ watchEffect(() => {
     align-items: center;
     justify-content: center;
   }
-
+  
   .sidebar-icon {
     width: 32px;
     height: 32px;
