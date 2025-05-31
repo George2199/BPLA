@@ -81,16 +81,12 @@ export default {
 h1 {
   font-size: 40px;
   margin-top: 80px;
-  margin-bottom: 70px;
-  margin-left: 60px;
+  margin-bottom: 220px;
 }
 
 .form-group {
   margin-bottom: 15px;
   max-width: 400px;
-  
-  
-  
 }
 
 label {
@@ -112,6 +108,7 @@ input {
 }
 
 button {
+  align-self: flex-end; /* Выравнивание кнопки по правому краю */
   width: 140px;
   padding: 10px;
   font-size: 20px;
@@ -119,10 +116,8 @@ button {
   color: white;
   border: none;
   border-radius: 5px;
-  margin-left: 250px;
   cursor: pointer;
-  
-  margin-top: 70px;
+  margin-top: 30px;
 }
 
 body {
@@ -171,6 +166,7 @@ html, body {
   padding: 40px;
   display: flex;
   flex-direction: column;
+  align-items: center; /* Центрирование содержимого по горизонтали */
 }
 
 #app {
@@ -184,4 +180,13 @@ html, body {
   flex-direction: column;
   padding: 20px;
 }
+
+form {
+  width: 100%;
+  max-width: 400px; /* совпадает с max-width формы */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
 </style>

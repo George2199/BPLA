@@ -56,6 +56,7 @@ const icons = [coursesIcon, codeIcon, commandIcon, simulatorIcon, chatIcon];
 .sidebar-button,
 .sidebar-button:link,
 .sidebar-button:visited {
+  margin-top: 10px;
   background: none;
   border: none;
   cursor: pointer;

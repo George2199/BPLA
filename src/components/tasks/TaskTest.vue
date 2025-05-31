@@ -21,8 +21,8 @@
    
      
     <div v-if="result">
-      <p>Результат: {{ result.score }} из {{ result.total }}</p>
-      <p>Прогресс: {{ (result.progress * 100).toFixed(0) }}%</p>
+      <p class="result_p">Результат: {{ result.score }} из {{ result.total }}</p>
+      <p class="result_p">Прогресс: {{ (result.progress * 100).toFixed(0) }}%</p>
       <div class="progress-bar">
     <div class="progress-fill" :style="{ width: (result.progress * 100) + '%' }"></div>
   </div>
@@ -157,7 +157,6 @@ watch(
   padding-right: 10px;
   scrollbar-gutter: stable;
   position: relative;
-  margin-bottom: 30px;
 }
 
 
@@ -182,12 +181,9 @@ watch(
 
 .test-card {
   position: relative;
-  
   background: transparent;
   color: var(--background_color);
-
-  padding: 24px 32px;
-  max-height: 90vh;
+  padding-top: 24px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -198,6 +194,7 @@ h2 {
   font-size: 20px;
   margin-bottom: 15px;
   margin-top: 0px;
+  text-align: center;
 }
 
 .text-input {
@@ -213,5 +210,9 @@ h2 {
 .text-input:focus {
   border-color: #aa33ff;
   box-shadow: 0 0 0 2px rgba(136, 0, 204, 0.2);
+}
+
+.result_p {
+  padding-left: 15px;
 }
 </style>

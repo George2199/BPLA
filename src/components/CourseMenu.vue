@@ -1,6 +1,6 @@
 <template>
   <div class="course-menu">
-    <div v-for="(theme, index) in themes" :key="theme.id">
+    <div class="topic-container" v-for="(theme, index) in themes" :key="theme.id" >
       <button @click="toggleTopic(index)" class="topic-button">
         {{ theme.title }}
         <span>{{ openedTopics.includes(index) ? '▲' : '▼' }}</span>
@@ -54,7 +54,6 @@ const selectTask = (task) => {
 .course-menu {
   width: 300px;
   border-radius: 8px;
-  padding: 15px;
 }
 
 /* Кнопки тем */
@@ -100,4 +99,9 @@ const selectTask = (task) => {
 .lesson-button:hover {
   background: var(--lesson_button_hover);
 }
+
+.topic-container {
+  margin-bottom: 5px; /* или сколько нужно */
+}
+
 </style>
