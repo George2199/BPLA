@@ -34,7 +34,7 @@
 <script setup>
 import { ref, onMounted, } from 'vue'
 import { useRoute } from 'vue-router'
-import axios from 'axios'
+import api from '@/api'
 
 import Shlyapabar from '@/components/Shlyapabar.vue'
 import CourseMenu from '@/components/CourseMenu.vue'
@@ -46,7 +46,6 @@ import TaskPractical from '@/components/tasks/TaskPractical.vue'
 import TaskSummary from '@/components/tasks/TaskSummary.vue'
 import TaskBlock from '@/components/tasks/TaskBlock.vue'
 
-const API_URL = import.meta.env.VITE_API_URL
 
 
 const route = useRoute()
@@ -73,7 +72,7 @@ const clearSelectedTask = () => {
 
 onMounted(async () => {
   try {
-    const res = await axios.get(`${API_URL}/courses/${courseId}`)
+    const res = await api.get(`/courses/${courseId}`)
     course.value = res.data
   } catch (err) {
     console.error('❌ Ошибка при загрузке курса:', err)

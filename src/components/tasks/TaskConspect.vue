@@ -13,7 +13,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { marked } from 'marked'
-import axios from 'axios'
+import api, { API_BASE_URL } from '@/api'
 
 const props = defineProps({
   task: Object
@@ -25,7 +25,7 @@ const mdContent = ref('')
 const renderedContent = ref('')
 
 // Получаем базовый URL API
-const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+const apiBaseUrl = API_BASE_URL
 console.log('API URL:', apiBaseUrl);
 
 // Настраиваем marked для поддержки HTML
@@ -42,7 +42,7 @@ marked.setOptions({
 async function fetchFileContent(url) {
   try {
     console.log(`Загрузка файла с URL: ${apiBaseUrl}${url}`);
-    const response = await axios.get(`${apiBaseUrl}${url}`);
+    const response = await api.get(`${url}`);
     console.log('Файл успешно загружен');
     return response.data;
   } catch (err) {
