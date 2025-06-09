@@ -44,6 +44,7 @@ main()
         data = resp.get_json()
         self.assertTrue(data.get('success'))
         self.assertIn('Hello, World!', data.get('output'))
+        self.assertIn('Block1ExtraTest', data.get('tests_output'))
 
 if __name__ == '__main__':
     unittest.main()
