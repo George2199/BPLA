@@ -105,7 +105,9 @@ def seed_courses():
                 type="block",
                 content=json.dumps({
                     "description": "Собери правильный порядок строк для вывода 'Hello, World!'",
-                    "test_file": "test_block1.py",
+
+                    "test_files": ["test_block1.py", "test_block1_extra.py"],
+
                     "blocks": [
                         { "content": "def main():", "type": "code" },
                         { "content": "print('Hello, World!')", "type": "code" },

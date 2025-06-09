@@ -299,9 +299,9 @@ const runCode = async () => {
   try {
     isRunning.value = true
     consoleOutput.value = ''
-
-    const response = await api.post('/execute', { code })
-    consoleOutput.value = response.data.output || '✅ код выполнен.'
+    const response = await api.post('/execute', { code, task_id: props.task.id })
+    const { output, tests_output } = response.data
+    consoleOutput.value = (output || '') + (tests_output ? '\n' + tests_output : '') || '✅ код выполнен.'
   } catch (error) {
     consoleOutput.value = `❌ ошибка:\n${error.response?.data?.error || error.message}`
   } finally {

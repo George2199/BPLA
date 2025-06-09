@@ -284,30 +284,42 @@ def execute_code():
         except Exception:
             content = {}
 
-    test_file = content.get('test_file')
-    if not test_file:
+    test_files = content.get('test_files')
+    if not test_files:
+        single = content.get('test_file')
+        test_files = [single] if single else []
+
+    if not test_files:
         return jsonify({'output': user_output})
 
-    test_path = os.path.join(BASE_DIR, 'block_tests', test_file)
-    if not os.path.exists(test_path):
-        return jsonify({'error': f'Test file {test_file} not found'}), 500
+    all_output = io.StringIO()
+    overall_success = True
 
-    with open(test_path, 'r', encoding='utf-8') as f:
-        test_code = f.read()
+    for fname in test_files:
+        test_path = os.path.join(BASE_DIR, 'block_tests', fname)
+        if not os.path.exists(test_path):
+            return jsonify({'error': f'Test file {fname} not found'}), 500
 
-    test_module = types.ModuleType("test_module")
-    test_module.__dict__.update(exec_namespace)
-    test_module.user_output = user_output
-    exec(test_code, test_module.__dict__)
+        with open(test_path, 'r', encoding='utf-8') as f:
+            test_code = f.read()
 
-    suite = unittest.defaultTestLoader.loadTestsFromModule(test_module)
-    buffer = io.StringIO()
-    result = unittest.TextTestRunner(stream=buffer, verbosity=2).run(suite)
+        test_module = types.ModuleType(f"test_module_{fname}")
+        test_module.__dict__.update(exec_namespace)
+        test_module.user_output = user_output
+        exec(test_code, test_module.__dict__)
+
+        suite = unittest.defaultTestLoader.loadTestsFromModule(test_module)
+        buffer = io.StringIO()
+        result = unittest.TextTestRunner(stream=buffer, verbosity=2).run(suite)
+        all_output.write(buffer.getvalue())
+        if not result.wasSuccessful():
+            overall_success = False
 
     return jsonify({
         'output': user_output,
-        'tests_output': buffer.getvalue(),
-        'success': result.wasSuccessful()
+        'tests_output': all_output.getvalue(),
+        'success': overall_success
+
     })
 
 if __name__ == '__main__':
