@@ -26,14 +26,14 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { API_BASE_URL } from '@/api'
 const props = defineProps({
   task: Object
 })
 
 // Поддержка ссылок вида "/data/videos/lesson1.mp4"
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 const computedVideoUrl = computed(() => {
-  return props.task?.content ? `${API_URL}/${props.task.content}` : ''
+  return props.task?.content ? `${API_BASE_URL}/${props.task.content}` : ''
 })
 
 const videoPlayer = ref(null)

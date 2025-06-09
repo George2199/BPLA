@@ -34,13 +34,13 @@
 <script setup>
 import { ref, watch, computed, } from 'vue'
 import ManySelect from './testBlocks/ManySelect.vue'
-import axios from 'axios'
+import api from '@/api'
 
 const result = ref(null)
 
 async function submitTest() {
   try {
-    const response = await axios.post('http://localhost:5000/submit_test', {
+    const response = await api.post('/submit_test', {
       answers: answers.value,
       task_id: props.task.id
     })
@@ -54,10 +54,10 @@ async function submitTest() {
 
 async function refreshCourses() {
   try {
-    const res = await axios.get(`${API_URL}/courses`);
-    courses.value = res.data;
+    const res = await api.get('/courses')
+    courses.value = res.data
   } catch (e) {
-    console.error('❌ Не удалось обновить курсы:', e);
+    console.error('❌ Не удалось обновить курсы:', e)
   }
 }
 

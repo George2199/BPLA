@@ -3,7 +3,7 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 from models import db, Role, Course, Theme, Task
 from config import BaseConfig
-import json, io, contextlib, sys, os
+import json, io, contextlib, sys, os, types, unittest
 
 # Определяем пути
 if getattr(sys, 'frozen', False):
@@ -257,17 +257,69 @@ def serve_conspect(filename):
 def execute_code():
     data = request.get_json()
     code = data.get('code', '')
+    task_id = data.get('task_id')
 
-    stdout = io.StringIO()
-    stderr = io.StringIO()
+    stdout_capture = io.StringIO()
+    exec_namespace = {}
 
     try:
-        with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
-            exec(code, {})  # исполняем код безопасно
+        with contextlib.redirect_stdout(stdout_capture):
+            exec(code, exec_namespace)
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
-    return jsonify({'output': stdout.getvalue()})
+    user_output = stdout_capture.getvalue()
+
+    if not task_id:
+        return jsonify({'output': user_output})
+
+    task = Task.query.get(task_id)
+    if not task:
+        return jsonify({'error': 'Task not found'}), 404
+
+    content = task.content
+    if isinstance(content, str):
+        try:
+            content = json.loads(content)
+        except Exception:
+            content = {}
+
+    test_files = content.get('test_files')
+    if not test_files:
+        single = content.get('test_file')
+        test_files = [single] if single else []
+
+    if not test_files:
+        return jsonify({'output': user_output})
+
+    all_output = io.StringIO()
+    overall_success = True
+
+    for fname in test_files:
+        test_path = os.path.join(BASE_DIR, 'block_tests', fname)
+        if not os.path.exists(test_path):
+            return jsonify({'error': f'Test file {fname} not found'}), 500
+
+        with open(test_path, 'r', encoding='utf-8') as f:
+            test_code = f.read()
+
+        test_module = types.ModuleType(f"test_module_{fname}")
+        test_module.__dict__.update(exec_namespace)
+        test_module.user_output = user_output
+        exec(test_code, test_module.__dict__)
+
+        suite = unittest.defaultTestLoader.loadTestsFromModule(test_module)
+        buffer = io.StringIO()
+        result = unittest.TextTestRunner(stream=buffer, verbosity=2).run(suite)
+        all_output.write(buffer.getvalue())
+        if not result.wasSuccessful():
+            overall_success = False
+
+    return jsonify({
+        'output': user_output,
+        'tests_output': all_output.getvalue(),
+        'success': overall_success
+    })
 
 if __name__ == '__main__':
     app.run(host="127.0.0.1", port=5000, debug=True)

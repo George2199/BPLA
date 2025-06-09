@@ -25,6 +25,7 @@
 <script setup>
 import { toDisplayString } from 'vue';
 import GradientBar from '@/components/GradientBar.vue';
+import api from '@/api'
 </script>
 
 
@@ -44,17 +45,10 @@ export default {
       };
 
       try {
-        const response = await fetch('http://127.0.0.1:5000/login', { // URL of your Flask backend
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(loginData), // Send data as JSON string
-        });
+        const response = await api.post('/login', loginData)
+        const result = response.data
 
-        const result = await response.json(); // Parse the JSON response from Flask
-
-        if (response.ok && result.success) {
+        if (result.success) {
           // Login successful
           console.log('Login successful, navigating to /courses'); // Path is /courses
           this.$router.push('/courses'); // Navigate back to /courses

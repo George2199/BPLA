@@ -17,7 +17,7 @@
 
   <img
     class="card-image"
-    :src="`${API_URL}${course.image_url}`"
+    :src="`${API_BASE_URL}${course.image_url}`"
     :alt="course.title"
   />
   <div class="card-text">{{ course.title }}</div>
@@ -29,14 +29,13 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import api, { API_BASE_URL } from '@/api'
 
-const API_URL = import.meta.env.VITE_API_URL
 const courses = ref([])
 
 onMounted(async () => {
   try {
-    const res = await axios.get(`${API_URL}/courses`)
+    const res = await api.get('/courses')
     courses.value = res.data
   } catch (e) {
     console.error('❌ Не удалось загрузить курсы:', e)
