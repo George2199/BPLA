@@ -11,7 +11,7 @@
 import homeIcon from '@/assets/icons/menu.png'
 import { useRoute, onBeforeRouteUpdate } from 'vue-router'
 import { computed, ref, watchEffect, inject } from 'vue'
-import axios from 'axios'
+import api from '@/api'
 
 const icons = [homeIcon]
 const route = useRoute()
@@ -29,7 +29,7 @@ const pageTitle = computed(() => {
 // Загружаем название курса по ID
 const fetchCourseTitle = async (id) => {
   try {
-    const response = await axios.get(`http://localhost:5000/courses/${id}`)
+    const response = await api.get(`/courses/${id}`)
     courseTitle.value = response.data.title
   } catch (err) {
     console.error('Ошибка при загрузке курса:', err)

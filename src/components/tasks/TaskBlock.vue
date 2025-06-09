@@ -55,7 +55,7 @@
 
 
 <script setup>
-import axios from 'axios'
+import api from '@/api'
 import { ref, onMounted } from 'vue'
 import draggable from 'vuedraggable'
 import { consoleOutput, showConsole } from '@/store/console'
@@ -300,7 +300,7 @@ const runCode = async () => {
     isRunning.value = true
     consoleOutput.value = ''
 
-    const response = await axios.post('http://localhost:5000/execute', { code })
+    const response = await api.post('/execute', { code })
     consoleOutput.value = response.data.output || '✅ код выполнен.'
   } catch (error) {
     consoleOutput.value = `❌ ошибка:\n${error.response?.data?.error || error.message}`
