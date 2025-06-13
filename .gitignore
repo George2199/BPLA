@@ -37,9 +37,6 @@ backend/instance/           # SQLite, seed и runtime файлы
 *.sqlite*
 db_debug_path.log
 
-# 👉 Env & secrets
-.env
-*.env.*
 
 # 👉 IDE / OS / редактор
 .vscode/
