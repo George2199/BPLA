@@ -1,16 +1,17 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 
 const routes = [
-  {
-    path: '/',
-    name: 'login',
-    component: () => import('@/views/Autorizatiion.vue'),
-    meta: {
-      title: 'Вход',
-      hideSidebar: true,
-      hasHeader: false
-     }
-  },
+{
+  path: '/',
+  name: 'login',
+  component: () => import('@/views/Autorizatiion.vue'),
+  meta: {
+    title: 'Вход',
+    hideSidebar: true,
+    hasHeader: false,
+    fullscreen: true // 👈 вот это
+  }
+},
   {
     path: '/courses',
     name: 'home',

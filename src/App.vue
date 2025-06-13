@@ -1,5 +1,5 @@
 <template>
-  <div class="app-layout" :class="{ 'no-sidebar': $route.meta.hideSidebar }">
+  <div v-if="!$route.meta.fullscreen" class="app-layout" :class="{ 'no-sidebar': $route.meta.hideSidebar }">
     <Sidebar v-if="!$route.meta.hideSidebar" />
 
     <div class="main-and-console" :class="{ 'with-header': $route.meta.hasHeader }">
@@ -16,7 +16,11 @@
       </div>
     </div>
   </div>
+
+  <!-- 👇 если fullscreen, просто рендерим компонент -->
+  <router-view v-else :key="$route.fullPath" />
 </template>
+
 
 <script setup>
 import Sidebar from '@/components/Sidebar.vue'

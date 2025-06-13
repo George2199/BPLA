@@ -1,10 +1,10 @@
 <template>
-  <GradientBar />
-  <div class="app-container">
-    <div class="left-panel">
-      Аэрокосмос
-    </div>
-    <div class="right-panel">
+<div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
+  <div class="glow glow-3"></div>
+  <div class="glow glow-4"></div>
+  <div class="aerocos">Аэрокосмос</div>
+    
       <h1>Авторизация</h1>
       <form @submit.prevent="handleSubmit">
         <div class="form-group">
@@ -17,14 +17,11 @@
         </div>
         <button type="submit">Далее</button>
       </form>
-    </div>
-  </div>
 </template>
 
 
 <script setup>
 import { toDisplayString } from 'vue';
-import GradientBar from '@/components/GradientBar.vue';
 import api from '@/api'
 </script>
 
@@ -70,7 +67,14 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
+
+.aerocos
+{
+  font-size: 100px;
+ padding-right: 200px;
+ margin-top: 150px;
+}
 
 h1 {
   font-size: 40px;
@@ -115,8 +119,74 @@ button {
 }
 
 body {
-  font-family: 'CustomFontName', Arial, sans-serif;
+  margin: 0;
+  height: 100vh;
+  background-color:#08000e;
+  background-repeat: no-repeat;
+  background-size: cover;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Inter', sans-serif;
+  color: #EDEFFF;
+  position: relative;
+  overflow: hidden;
 }
+
+/* Эффект свечения (градиентное пятно) */
+.glow-1 {
+  content: "";
+  position: absolute;
+  width: 1900px;
+  height: 1200px;
+  background: radial-gradient(circle at center, #c4affa 20%,transparent 100%);
+  top: 20%;
+  right: 5%;
+  transform: translate(30%, -55%);
+  filter: blur(150px);
+  opacity: 0.6;
+  z-index: -1;
+}
+
+.glow-2 {
+  content: "";
+  position: absolute;
+  width: 900px;
+  height: 500px;
+  background: radial-gradient(circle at center, #3f14a5 40%, transparent 100%);
+  top: 20%;
+  right: 10%;
+  transform: translate(60%, -80%);
+  filter: blur(100px);
+  z-index: -1;
+}
+
+.glow-3 {
+  content: "";
+  position: absolute;
+  width: 400px;
+  height: 500px;
+  background: radial-gradient(circle at center, #CDBDF5 40%, transparent 100%);
+  top: 20%;
+  right: 10%;
+  transform: translate(-100%, -80%);
+  filter: blur(100px);
+  z-index: -1;
+}
+
+.glow-4 {
+  content: "";
+  position: absolute;
+  width: 200px;
+  height: 300px;
+  background: radial-gradient(circle at center, #CDBDF5 40%, transparent 100%);
+  top: 20%;
+  right: 10%;
+  transform: translate(60%, -30%);
+  filter: blur(100px);
+  z-index: -1;
+}
+
 
 button:hover {
   background-color: #282828;
@@ -134,34 +204,6 @@ html, body {
   height: 100%;
 }
 
-/* 🔹 Главный контейнер */
-.app-container {
-  display: flex;
-  height: 100vh;
-  width: 100%;
-}
-
-/* Левая часть с логотипом или градиентом */
-.left-panel {
-  flex: 1;
-  background: linear-gradient(to bottom, #0d001a, #5c1a83);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 40px;
-  font-weight: bold;
-}
-
-/* Правая часть с формой */
-.right-panel {
-  width: 500px;
-  background: #ffffff;
-  padding: 40px;
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* Центрирование содержимого по горизонтали */
-}
 
 #app {
   padding: 0;
