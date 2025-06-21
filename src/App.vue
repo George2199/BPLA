@@ -1,6 +1,8 @@
 <template>
-  <div v-if="!$route.meta.fullscreen" class="app-layout" :class="{ 'no-sidebar': $route.meta.hideSidebar }">
-    <Sidebar v-if="!$route.meta.hideSidebar" />
+  <div v-if="!$route.meta.fullscreen" class="app-layout">
+  <TatliStarts />
+
+
 
     <div class="main-and-console" :class="{ 'with-header': $route.meta.hasHeader }">
       <div class="main-scroll-zone">
@@ -23,7 +25,7 @@
 
 
 <script setup>
-import Sidebar from '@/components/Sidebar.vue'
+import TatliStarts from '@/components/TatliStarts.vue'
 import { consoleOutput, consoleVisible, toggleConsole, hideConsole } from '@/store/console'
 import { onMounted, onBeforeUnmount } from 'vue'
 import { std } from '@/themes/themes'
@@ -123,12 +125,6 @@ html, body {
   opacity: 0;
 }
 
-.app-layout.no-sidebar .main-and-console {
-  padding-left: 0 !important;
-}
 
-.app-layout.no-sidebar {
-  flex-direction: column; /* или row, если надо */
-}
 
 </style>

@@ -3,17 +3,48 @@
     <button class="sidebar-button">
       <img :src="icons[0]" alt="Меню" class="sidebar-icon" />
     </button>
+
+    <router-link to="/courses" class="sidebar-link">
+
+      <button class="sidebar-button">
+        <img :src="icons[1]" alt="Courses" class="sidebar-icon" />
+      </button>
+    </router-link>
+
+<button class="sidebar-button">
+      <img :src="icons[2]" alt="Terminal" class="sidebar-icon" />
+    </button>
+
+    <button class="sidebar-button" @click="toggleConsole">
+      <img :src="commandIcon" alt="Console" class="sidebar-icon" />
+    </button>
+    
+    <button class="sidebar-button">
+      <img :src="icons[4]" alt="Terminal" class="sidebar-icon" />
+    </button>
+
+     <button class="sidebar-button">
+      <img :src="icons[5]" alt="Terminal" class="sidebar-icon" />
+    </button>
+    
+
     <h1 class="shlyapabar-title">{{ pageTitle }}</h1>
   </div>
 </template>
 
 <script setup>
 import homeIcon from '@/assets/icons/menu.png'
+import coursesIcon from '@/assets/icons/courses.png';
+import codeIcon from '@/assets/icons/code.png';
+import commandIcon from '@/assets/icons/command.png';
+import simulatorIcon from '@/assets/icons/simulator.png';
+import chatIcon from '@/assets/icons/chat.png';
+import { toggleConsole } from '@/store/console'
 import { useRoute, onBeforeRouteUpdate } from 'vue-router'
 import { computed, ref, watchEffect, inject } from 'vue'
 import api from '@/api'
 
-const icons = [homeIcon]
+const icons = [homeIcon, coursesIcon, codeIcon, commandIcon, simulatorIcon, chatIcon]
 const route = useRoute()
 const courseTitle = ref('')
 
@@ -53,10 +84,10 @@ watchEffect(() => {
     left: 0;
     right: 0;
     height: 60px;
-    background: linear-gradient(90deg, var(--shlyapabar_left_color), var(--shlyapabar_right_color));
+    background: transparent;
     display: flex;
     align-items: center;
-    z-index: 9999;
+    z-index: 0;
     box-sizing: border-box;
   }
 

@@ -7,7 +7,6 @@ const routes = [
   component: () => import('@/views/Autorizatiion.vue'),
   meta: {
     title: 'Вход',
-    hideSidebar: true,
     hasHeader: false,
     fullscreen: true // 👈 вот это
   }
