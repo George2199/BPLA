@@ -3,12 +3,10 @@
 </template>
 
 <script setup>
-import { shared } from '@/components/glowState'
-
 import { onMounted, onBeforeUnmount, ref } from 'vue'
 
 const cv = ref(null)
-let ctx, raf
+let ctx, glows = [], raf
 
 const AMOUNT = 4
 const COLORS = [  '#c4affa',  // сиреневый
@@ -70,10 +68,10 @@ function tick() {
   const { width: w, height: h } = cv.value
   ctx.clearRect(0, 0, w, h)
 
-    shared.glows.forEach(g => {
+  glows.forEach(g => {
     g.move(w, h)
     g.draw()
-    })
+  })
 
   raf = requestAnimationFrame(tick)
 }
@@ -84,11 +82,10 @@ function resize() {
   cv.value.height = innerHeight * dpr
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
 
-    shared.glows.length = 0
-    for (let i = 0; i < AMOUNT; i++) {
-    shared.glows.push(new Glow(innerWidth, innerHeight))
-    }
-
+  glows = []
+  for (let i = 0; i < AMOUNT; i++) {
+    glows.push(new Glow(innerWidth, innerHeight))
+  }
 }
 
 onMounted(() => {
