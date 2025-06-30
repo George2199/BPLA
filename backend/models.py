@@ -109,7 +109,6 @@ class BlockTask(db.Model):
     __tablename__ = 'block_tasks'
     id = db.Column(db.Integer, primary_key=True)
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
-    block_id = db.Column(db.Integer, db.ForeignKey('blocks.id'), nullable=False)
 
     block = db.relationship('Block')
     task = db.relationship('Task')

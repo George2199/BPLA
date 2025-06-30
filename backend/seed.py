@@ -93,7 +93,7 @@ def seed_courses():
     db.session.add(test)
     db.session.flush()
 
-    with open("./data/tests/seed.json", "r", encoding="utf-8") as f:
+    with open("./data/tests/tests_1.json", "r", encoding="utf-8") as f:
         test_data = json.load(f)
 
     for q in test_data["questions"]:
@@ -108,7 +108,7 @@ def seed_courses():
     db.session.add(block_task)
     db.session.flush()
 
-    db.session.add(BlockTask(task_id=block_task.id, block_id=block.id))
+    db.session.add(BlockTask(task_id=block_task.id))
 
     bt = BlockType(type="code")
     db.session.add(bt)
@@ -117,18 +117,6 @@ def seed_courses():
     db.session.add(bt)
     db.session.flush()
 
-    blocks = [
-        Block(cat="def main()", type=BlockType.query.filter_by(type="code").first()),
-        Block(cat="print('Hello, World!", type=BlockType.query.filter_by(type="code").first()),
-        Block(cat="main()", type= BlockType.query.filter_by(type="code").first()),
-        Block(cat="for i in range(5):", type = BlockType.query.filter_by(type="container").first()),
-        Block(cat="basic", type = BlockType.query.filter_by(type="code").first()),
-    ]
-
-    for block in blocks:
-        db.session.add(block)
-        db.session.flush()
-
     python_course.themes = [
         Theme(title="Тема 1: Основы синтаксиса", tasks=[
             Task(title="Видео: Переменные", type="video", path=VIDEO_PATH + "perem.mp4"),
@@ -136,70 +124,56 @@ def seed_courses():
         ]),
         Theme(title="Тема 2: Условия", tasks=[
             Task(title="Видео: if/else", type="video", content=VIDEO_PATH + "ifelse.mp4"),
-            Task(
-                title="Тест 1: Контроллер и полёт",
-                type="test",
-                content=json.dumps({
-                    "questions": [
-                        {
-                            "question": "Что такое БВС?",
-                            "options": [
-                                "Беспилотное воздушное средство",
-                                "Беспилотное водное средство",
-                                "Беспилотное ветряное средство",
-                                "Беспилотное вкусное средство"
-                            ],
-                            "correct_answers": [0]
-                        },
-                        {
-                            "question": "Что такое БВС1?",
-                            "options": [
-                                "Беспилотное воздушное средство",
-                                "Беспилотное водное средство",
-                                "Беспилотное ветряное средство",
-                                "Беспилотное вкусное средство"
-                            ],
-                            "correct_answers": [0]
-                        },
-                        {
-                            "question": "Где нельзя запускать БВС?",
-                            "options": [
-                                "Над военными объектами",
-                                "Вблизи аэропортов",
-                                "В закрытых помещениях",
-                                "На Юпитере"
-                            ],
-                            "correct_answers": [0, 2]
-                        }
-                    ]
-                })
-            ),
-            Task(
-                title="Блоки кода 1: Hello, World!",
-                type="block",
-                content=json.dumps({
-                    "description": "Собери правильный порядок строк для вывода 'Hello, World!'",
-
-                    "test_files": ["test_block1.py", "test_block1_extra.py"],
-
-                    "blocks": [
-                        { "content": "def main():", "type": "code" },
-                        { "content": "print('Hello, World!')", "type": "code" },
-                        { "content": "main()", "type": "code" },
-                        {
-                            "type": "container",
-                            "label": "for i in range(5):",
-                            "children": [
-                                { "content": "    print(i)", "type": "code" }
-                            ]
-                        },
-                        { "content": "print('Goodbye, World!')", "type": "code" }
-                    ]
-                })
-            ),
         ])
     ]
 
     db.session.add_all([python_course, cosmos_course, drone_course])
     db.session.commit()
     print("✅ Courses, themes, and tasks seeded.")
+
+def parse_blocks(json_path):
+    l = []
+    with open(json_path, "r", encoding="utf-8") as f:
+        parse_data = json.load(f)
+
+        for b in parse_data["blocks"]:
+            l.append([b['cat'], b['type']])
+    return l
+
+def get_types(json_path):
+    with open(json_path, "r", encoding="utf-8") as f:
+        parse_data = json.load(f)
+
+        types = set([i['type'] for i in parse_data["blocks"]])
+
+    return types
+           
+def commit_blocks(json_path):
+    parse_data = parse_blocks(json_path)
+    block_types = {t: BlockType.query.filter_by(type=t).first()
+                   for t in get_types(json_path)}
+    for b in parse_data:
+        db.session.add(Block(cat = b[0], type_id = block_types[b[1]]))
+    db.session.commit()
+
+def parse_tests(json_path, test_id):
+    l = []
+    with open(json_path, "r", encoding="utf-8") as f:
+        parse_data = json.load(f)
+        for q in parse_data["questions"]:
+            question = Question(test_id=test_id, question_text=q["question_text"])
+            # db.session.add(question)
+            # db.session.flush()
+            opts = []
+            for opt in (q["options"]):
+                is_correct = bool(q["options"][opt]["is_right"])
+                opts.append(Option(question_id=question.id, option_text=opt, is_right=is_correct))
+            l.append([question, opts])
+    return l
+
+def commit_tests(json_path, test_id):
+    parsed_data = parse_tests(json_path, test_id)
+    for q in parsed_data:
+        db.session.add(q[0])
+        db.session.add_all(q[1])
+    db.session.commit()

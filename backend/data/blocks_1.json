@@ -1,0 +1,26 @@
+{"blocks": [
+{
+    "cat": "def main():",
+    "type": "container"
+},
+{
+    "cat": "for i in range(5):",
+    "type": "container"
+},
+{
+    "cat": "print('Hello, World!",
+    "type": "code"
+},
+{
+    "cat": "print(i)",
+    "type": "code"
+},
+{
+    "cat": "print('Goodbye, World!')",
+    "type": "code"
+},
+{
+    "cat": "main()",
+    "type": "code"
+}
+]}
