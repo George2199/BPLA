@@ -1,31 +1,9 @@
-import json
-import os
-from flask import Flask
-from flask_migrate import upgrade, Migrate
-from config import BaseConfig
 from models import db, BlockType, Role, Course, Theme, Task, TaskType, Video, Conspect, File, Test, Question, Option, Block, BlockTask
+import json
 
 IMG_PATH = "/data/imgs/"
 VIDEO_PATH = "/data/videos/"
 CONSPECT_PATH = "/data/conspects/"
-
-def run_migrations():
-    print("📦 Running migrations...")
-
-    from flask import Flask
-    from flask_migrate import upgrade, Migrate
-    from models import db
-    from config import BaseConfig
-
-    app = Flask(__name__)
-    app.config["SQLALCHEMY_DATABASE_URI"] = BaseConfig.get_sqlite_uri()
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-    db.init_app(app)
-    Migrate(app, db)
-
-    with app.app_context():
-        upgrade()
 
 def clear_tables():
     print("⚠️ Удаление всех данных из таблиц...")
@@ -73,53 +51,29 @@ def seed_courses():
         image_url=IMG_PATH + "Python.png",
         progress=0.3
     )
-    db.session.add(python_course)
-
 
     cosmos_course = Course(
         title="Аэрокосмос",
         image_url=IMG_PATH + "Cosmos.png",
         progress=0.0
     )
-    db.session.add(cosmos_course)
-
 
     drone_course = Course(
         title="Управление БПЛА",
         image_url=IMG_PATH + "Drone.png",
         progress=0.7
     )
-    db.session.add(drone_course)
-    db.session.flush()
-
-    task_types = [
-        TaskType(type = 'video'),
-        TaskType(type = 'test'),
-        TaskType(type = 'block'),
-        TaskType(type = 'conspect'),
-    ]
-
-    db.session.add_all(task_types)
-    db.session.commit()
-
-    type_video = TaskType.query.filter_by(type='video').first()
-    type_test = TaskType.query.filter_by(type='test').first()
-    type_block = TaskType.query.filter_by(type='block').first()
-    type_conspect = TaskType.query.filter_by(type='conspect').first()
 
     theme1 = Theme(course_id = python_course.id, title="Тема 1: Основы синтаксиса")
     theme2 = Theme(course_id = python_course.id, title="Тема 2: Условия")
-    db.session.add(theme1)
-    db.session.add(theme2)
-    db.session.flush()
 
     # Видео задача
-    video_task = Task(title="Видео: Переменные", type_id=type_video, theme_id = theme1.id)
+    video_task = Task(title="Видео: Переменные", type="video", theme_id = theme1.id)
     db.session.add(video_task)
     db.session.flush()
     db.session.add(Video(task_id=video_task.id, path=VIDEO_PATH + "perem.mp4"))
 
-    conspect_task = Task(title="Конспект: Переменные", type_id=type_conspect, theme_id = theme1.id)
+    conspect_task = Task(title="Конспект: Переменные", type="conspect", theme_id = theme1.id)
     db.session.add(conspect_task)
     db.session.flush()
     conspect = Conspect(task_id=conspect_task.id, path=CONSPECT_PATH + "conspect1.md")
@@ -127,26 +81,30 @@ def seed_courses():
     db.session.flush()
     db.session.add(File(conspect_id=conspect.id, file_path=CONSPECT_PATH + "conspect1.md"))
 
-    video_task = Task(title="Видео: if/else", type_id=type_video, theme_id = theme2.id)
+    video_task = Task(title="Видео: if/else", type="video", theme_id = theme2.id)
     db.session.add(video_task)
     db.session.flush()
     db.session.add(Video(task_id=video_task.id, path=VIDEO_PATH + "ifelse.mp4"))
 
-    test_task = Task(title="Тест 1: Контроллер и полёт", type_id=type_test, theme_id = theme2.id)
+    test_task = Task(title="Тест 1: Контроллер и полёт", type="test", theme_id = theme2.id)
     db.session.add(test_task)
     db.session.flush()
     test = Test(task_id=test_task.id)
     db.session.add(test)
     db.session.flush()
 
-    tests = parse_tests("./data/tests/tests_1.json", test.id)
-    commit_tests(tests)
+    with open("./data/tests/tests_1.json", "r", encoding="utf-8") as f:
+        test_data = json.load(f)
 
-    blocks = parse_blocks("./data/blocks_1.json")
-    types = get_types("backend/data/blocks_1.json")
-    commit_blocks(blocks, types)
+    for q in test_data["questions"]:
+        question = Question(test_id=test.id, question_text=q["question_text"])
+        db.session.add(question)
+        db.session.flush()
+        for opt in (q["options"]):
+            is_correct = bool(q["options"][opt]["is_right"])
+            db.session.add(Option(question_id=question.id, option_text=opt, is_right=is_correct))
 
-    block_task = Task(title="еБлоки кода 1: Hello, World!", type_id=type_block, theme_id = theme2.id)
+    block_task = Task(title="еБлоки кода 1: Hello, World!", type="block", theme_id = theme2.id)
     db.session.add(block_task)
     db.session.flush()
 
@@ -159,6 +117,15 @@ def seed_courses():
     db.session.add(bt)
     db.session.flush()
 
+    python_course.themes = [
+        Theme(title="Тема 1: Основы синтаксиса", tasks=[
+            Task(title="Видео: Переменные", type="video", path=VIDEO_PATH + "perem.mp4"),
+            Task(title="Конспект: Переменные", type="conspect", content=CONSPECT_PATH + "conspect1.md"),
+        ]),
+        Theme(title="Тема 2: Условия", tasks=[
+            Task(title="Видео: if/else", type="video", content=VIDEO_PATH + "ifelse.mp4"),
+        ])
+    ]
 
     db.session.add_all([python_course, cosmos_course, drone_course])
     db.session.commit()
@@ -181,10 +148,10 @@ def get_types(json_path):
 
     return types
            
-def commit_blocks(blocks, types):
-    parse_data = blocks
+def commit_blocks(json_path):
+    parse_data = parse_blocks(json_path)
     block_types = {t: BlockType.query.filter_by(type=t).first()
-                   for t in types}
+                   for t in get_types(json_path)}
     for b in parse_data:
         db.session.add(Block(cat = b[0], type_id = block_types[b[1]]))
     db.session.commit()
@@ -204,8 +171,8 @@ def parse_tests(json_path, test_id):
             l.append([question, opts])
     return l
 
-def commit_tests(tests):
-    parsed_data = tests
+def commit_tests(json_path, test_id):
+    parsed_data = parse_tests(json_path, test_id)
     for q in parsed_data:
         db.session.add(q[0])
         db.session.add_all(q[1])

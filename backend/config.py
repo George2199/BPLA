@@ -9,8 +9,11 @@ class BaseConfig:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     @staticmethod
-    def get_sqlite_uri(db_path):
+    def get_sqlite_uri(db_path=None):
+        if not db_path:
+            db_path = os.getenv("SQLITE_PATH", "data/db.sqlite3")
         return f"sqlite:///{db_path}"
+
 
     @staticmethod
     def get_postgres_uri():

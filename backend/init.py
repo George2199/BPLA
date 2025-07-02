@@ -7,18 +7,20 @@ load_dotenv()  # Загружаем переменные окружения
 # Путь к SQLite файлу
 DB_PATH = os.getenv("SQLITE_PATH", "db.sqlite3")
 
-def ensure_db_file():
-    if not os.path.exists(DB_PATH):
-        print(f"📁 Creating SQLite database at '{DB_PATH}'...")
-        open(DB_PATH, 'a').close()
-    else:
-        print(f"✅ SQLite database already exists at '{DB_PATH}'.")
+def ensure_clean_db():
+    if os.path.exists(DB_PATH):
+        os.remove(DB_PATH)
+        print(f"🗑️ Removed old DB at '{DB_PATH}'")
+
+    print(f"📁 Creating clean SQLite DB at '{DB_PATH}'")
+    open(DB_PATH, 'a').close()
+
 
 def run_migrations():
     print("📦 Running migrations...")
 
     backend_dir = os.path.dirname(os.path.abspath(__file__))
-    os.environ["FLASK_APP"] = "app.py"
+    # os.environ["FLASK_APP"] = "app.py"
 
     result = subprocess.run(
         ["flask", "db", "upgrade"],
@@ -32,5 +34,5 @@ def run_migrations():
         print("⚠️ Migration errors:\n", result.stderr)
 
 if __name__ == "__main__":
-    ensure_db_file()
+    ensure_clean_db()
     run_migrations()

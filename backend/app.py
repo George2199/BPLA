@@ -13,12 +13,12 @@ else:
 
 DATA_DIR = os.path.join(BASE_DIR, 'data')
 os.makedirs(DATA_DIR, exist_ok=True)
-db_path = os.path.join(DATA_DIR, 'app.db')
+db_path = os.path.join(DATA_DIR, 'db.sqlite3')
 
 # Создаем Flask app
 app = Flask(__name__)
 app.config.from_object(BaseConfig)
-app.config["SQLALCHEMY_DATABASE_URI"] = BaseConfig.get_sqlite_uri(db_path)
+app.config["SQLALCHEMY_DATABASE_URI"] = BaseConfig.get_sqlite_uri()
 
 # Инициализация
 db.init_app(app)
@@ -35,6 +35,7 @@ if not os.path.exists(db_path):
         db.create_all()
         try:
             import seed
+            seed.run_migrations()
             seed.clear_tables()
             seed.seed_roles()
             seed.seed_courses()
