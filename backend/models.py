@@ -14,8 +14,6 @@ class Role(db.Model):
     save_block = db.relationship('SaveBlock')
     save_test = db.relationship('SaveTest')
 
-
-
 class Course(db.Model):
     __tablename__ = 'courses'
 
@@ -81,7 +79,6 @@ class Test(db.Model):
     questions = db.relationship('Question', backref='test', lazy=True, cascade='all, delete-orphan')
     save_test = db.relationship('SaveTest')
 
-
 class Question(db.Model):
     __tablename__ = 'questions'
     id = db.Column(db.Integer, primary_key=True)
@@ -91,7 +88,6 @@ class Question(db.Model):
     options = db.relationship('Option', backref='question', lazy=True, cascade='all, delete-orphan')
     save_test = db.relationship('SaveTest')
 
-
 class Option(db.Model):
     __tablename__ = 'options'
     id = db.Column(db.Integer, primary_key=True)
@@ -100,7 +96,6 @@ class Option(db.Model):
     is_right = db.Column(db.Boolean, default=False)
 
     save_test = db.relationship('SaveTest')
-
     
 class BlockType(db.Model):
     __tablename__ = 'block_types'
@@ -119,7 +114,6 @@ class Block(db.Model):
 
     parent_id = db.Column(db.Integer, db.ForeignKey('blocks.id'), nullable=True)
     save_block = db.relationship('SaveBlock')
-
 
 class BlockTask(db.Model):
     __tablename__ = 'block_tasks'
@@ -140,7 +134,6 @@ class SaveBlock(db.Model):
     is_used = db.Column(db.Boolean, nullable=True)
     place = db.Column(db.Integer, nullable=True)
     parent = db.Column(db.Integer, nullable=True)
-
 
 class SaveTest(db.Model):
     __tablename__ = 'save_tests'

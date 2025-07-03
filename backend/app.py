@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from flask_migrate import Migrate
-from models import db, Role, Course, Theme, Task
+from models import db, Role, Course, Theme, Task, TaskType
 from config import BaseConfig
 import json, io, contextlib, sys, os, types, unittest
 
@@ -11,7 +11,10 @@ if getattr(sys, 'frozen', False):
 else:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-DATA_DIR = os.path.join(BASE_DIR, 'data')
+DATA_DIR = os.path.join(BASE_DIR)
+IMGS_PATH = os.path.join(BASE_DIR, "data", "imgs")
+VIDS_PATH = os.path.join(BASE_DIR, "data", "videos")
+
 os.makedirs(DATA_DIR, exist_ok=True)
 db_path = os.path.join(DATA_DIR, 'db.sqlite3')
 
@@ -30,18 +33,21 @@ with open("db_debug_path.log", "w", encoding="utf-8") as f:
 
 if not os.path.exists(db_path):
     print("[INFO] Database not found. Initializing...")
-
     with app.app_context():
         db.create_all()
-        try:
-            import seed
-            seed.run_migrations()
-            seed.clear_tables()
-            seed.seed_roles()
-            seed.seed_courses()
-            print("[INFO] Initialization complete.")
-        except Exception as e:
-            print(f"[ERROR] Initialization failed: {e}")
+
+with app.app_context():
+    os.remove(db_path)
+    db.create_all()
+    try:
+        import seed
+        seed.run_migrations()
+        seed.clear_tables()
+        seed.seed_roles()
+        seed.seed_courses()
+        print("[INFO] Initialization complete.")
+    except Exception as e:
+        print(f"[ERROR] Initialization failed: {e}")
 
 CORS(app, resources={r"/*": {"origins": "*"}})
 
@@ -117,7 +123,7 @@ def get_courses():
                         {
                             "id": task.id,
                             "title": task.title,
-                            "type": task.type,
+                            "type": task.task_type.type,
                             "content": parse_content(task.content)
                         } for task in t.tasks
                     ]
@@ -145,14 +151,13 @@ def get_course_by_id(id):
                     {
                         "id": task.id,
                         "title": task.title,
-                        "type": task.type,
+                        "type": task.task_type.type,
                         "content": parse_content(task.content),
                     } for task in t.tasks
                 ]
             } for t in course.themes
         ],
     })
-
 
 @app.route('/themes', methods=['GET'])
 def get_themes():
@@ -173,11 +178,11 @@ def get_themes():
 
 @app.route('/data/imgs/<path:filename>')
 def serve_course_image(filename):
-    return send_from_directory(os.path.join(DATA_DIR, 'imgs'), filename)
+    return send_from_directory(IMGS_PATH, filename)
 
 @app.route('/data/videos/<path:filename>')
 def serve_video(filename):
-    return send_from_directory(os.path.join(DATA_DIR, 'videos'), filename)
+    return send_from_directory(VIDS_PATH, filename)
 
 @app.route('/submit_test', methods=['POST'])
 def submit_test():

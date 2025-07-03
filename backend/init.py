@@ -19,8 +19,8 @@ def ensure_clean_db():
 def run_migrations():
     print("📦 Running migrations...")
 
-    backend_dir = os.path.dirname(os.path.abspath(__file__))
-    # os.environ["FLASK_APP"] = "app.py"
+    # os.environ["FLASK_APP"] = "app.py
+    backend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 
     result = subprocess.run(
         ["flask", "db", "upgrade"],

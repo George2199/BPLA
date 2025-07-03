@@ -64,105 +64,30 @@ def seed_roles():
     print("✅ Roles table seeded successfully.")
 
 def seed_courses():
-    if Course.query.first():
-        print("🔍 Courses already seeded.")
-        return
-    
-    python_course = Course(
-        title="Python. Введение",
-        image_url=IMG_PATH + "Python.png",
-        progress=0.3
-    )
-    db.session.add(python_course)
+
+    with open("./data/courses.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+        gpt_seed_from_json(data)
+
+def parse_courses(courses_path):
+    l = []
+
+    with open(courses_path, "r", encoding="utf-8") as f:
+        parse_data = json.load(f)
+
+        for c in parse_data["courses"]:
+            course_id = commit_course_and_get_id()
+            parse_tasks(f)
 
 
-    cosmos_course = Course(
-        title="Аэрокосмос",
-        image_url=IMG_PATH + "Cosmos.png",
-        progress=0.0
-    )
-    db.session.add(cosmos_course)
+def commit_types(json_path):
+    l = []
+    with open(json_path, "r", encoding="utf-8") as f:
+        parse_data = json.load(f)
 
-
-    drone_course = Course(
-        title="Управление БПЛА",
-        image_url=IMG_PATH + "Drone.png",
-        progress=0.7
-    )
-    db.session.add(drone_course)
-    db.session.flush()
-
-    task_types = [
-        TaskType(type = 'video'),
-        TaskType(type = 'test'),
-        TaskType(type = 'block'),
-        TaskType(type = 'conspect'),
-    ]
-
-    db.session.add_all(task_types)
-    db.session.commit()
-
-    type_video = TaskType.query.filter_by(type='video').first()
-    type_test = TaskType.query.filter_by(type='test').first()
-    type_block = TaskType.query.filter_by(type='block').first()
-    type_conspect = TaskType.query.filter_by(type='conspect').first()
-
-    theme1 = Theme(course_id = python_course.id, title="Тема 1: Основы синтаксиса")
-    theme2 = Theme(course_id = python_course.id, title="Тема 2: Условия")
-    db.session.add(theme1)
-    db.session.add(theme2)
-    db.session.flush()
-
-    # Видео задача
-    video_task = Task(title="Видео: Переменные", type_id=type_video, theme_id = theme1.id)
-    db.session.add(video_task)
-    db.session.flush()
-    db.session.add(Video(task_id=video_task.id, path=VIDEO_PATH + "perem.mp4"))
-
-    conspect_task = Task(title="Конспект: Переменные", type_id=type_conspect, theme_id = theme1.id)
-    db.session.add(conspect_task)
-    db.session.flush()
-    conspect = Conspect(task_id=conspect_task.id, path=CONSPECT_PATH + "conspect1.md")
-    db.session.add(conspect)
-    db.session.flush()
-    db.session.add(File(conspect_id=conspect.id, file_path=CONSPECT_PATH + "conspect1.md"))
-
-    video_task = Task(title="Видео: if/else", type_id=type_video, theme_id = theme2.id)
-    db.session.add(video_task)
-    db.session.flush()
-    db.session.add(Video(task_id=video_task.id, path=VIDEO_PATH + "ifelse.mp4"))
-
-    test_task = Task(title="Тест 1: Контроллер и полёт", type_id=type_test, theme_id = theme2.id)
-    db.session.add(test_task)
-    db.session.flush()
-    test = Test(task_id=test_task.id)
-    db.session.add(test)
-    db.session.flush()
-
-    tests = parse_tests("./data/tests/tests_1.json", test.id)
-    commit_tests(tests)
-
-    blocks = parse_blocks("./data/blocks_1.json")
-    types = get_types("backend/data/blocks_1.json")
-    commit_blocks(blocks, types)
-
-    block_task = Task(title="еБлоки кода 1: Hello, World!", type_id=type_block, theme_id = theme2.id)
-    db.session.add(block_task)
-    db.session.flush()
-
-    db.session.add(BlockTask(task_id=block_task.id))
-
-    bt = BlockType(type="code")
-    db.session.add(bt)
-    db.session.flush()
-    bt = BlockType(type="container")
-    db.session.add(bt)
-    db.session.flush()
-
-
-    db.session.add_all([python_course, cosmos_course, drone_course])
-    db.session.commit()
-    print("✅ Courses, themes, and tasks seeded.")
+        for b in parse_data["blocks"]:
+            l.append([b['cat'], b['type']])
+    return l
 
 def parse_blocks(json_path):
     l = []
@@ -171,6 +96,15 @@ def parse_blocks(json_path):
 
         for b in parse_data["blocks"]:
             l.append([b['cat'], b['type']])
+    return l
+
+def parse_tasks(json_path):
+    l = []
+    with open(json_path, "r", encoding="utf-8") as f:
+        parse_data = json.load(f)
+
+        for t in parse_data["tasks"]:
+            l.append([t['cat'], t['type']])
     return l
 
 def get_types(json_path):
@@ -189,24 +123,111 @@ def commit_blocks(blocks, types):
         db.session.add(Block(cat = b[0], type_id = block_types[b[1]]))
     db.session.commit()
 
-def parse_tests(json_path, test_id):
+def parse_tests(json_path, task_id):
     l = []
     with open(json_path, "r", encoding="utf-8") as f:
         parse_data = json.load(f)
         for q in parse_data["questions"]:
-            question = Question(test_id=test_id, question_text=q["question_text"])
-            # db.session.add(question)
-            # db.session.flush()
+            question_id = commit_question_and_get_id(test_id=commit_test_and_get_id(task_id),
+                                       question_text=q["question_text"])
             opts = []
             for opt in (q["options"]):
                 is_correct = bool(q["options"][opt]["is_right"])
-                opts.append(Option(question_id=question.id, option_text=opt, is_right=is_correct))
-            l.append([question, opts])
+                opts.append(Option(question_id=question_id, option_text=opt, is_right=is_correct))
+            l.append(opts)
     return l
 
-def commit_tests(tests):
-    parsed_data = tests
-    for q in parsed_data:
-        db.session.add(q[0])
-        db.session.add_all(q[1])
+
+def commit_course_and_get_id(test_id, question_text) -> int:
+    question = Question(test_id=test_id, question_text=question_text)
+    db.session.add(question)
     db.session.commit()
+
+def commit_question_and_get_id(test_id, question_text) -> int:
+    question = Question(test_id=test_id, question_text=question_text)
+    db.session.add(question)
+    db.session.commit()
+
+    return question.id
+
+def commit_test_and_get_id(task_id) -> int:
+    # task
+    test = Test(task_id=task_id)
+    db.session.add(test)
+    db.session.commit()
+
+    return test.id
+
+def commit_opts(opts):
+    parsed_data = opts
+    for q in parsed_data:
+        db.session.add_all(q)
+    db.session.commit()
+
+def gpt_seed_from_json(data):
+    for course_key, course_data in data["courses"].items():
+        course = Course(
+            title=course_data["title"],
+            image_url=IMG_PATH + course_data.get("image", ""),
+            progress=course_data.get("progress", 0.0)
+        )
+        db.session.add(course)
+        db.session.flush()
+
+        for theme_title, theme_data in course_data.get("themes", {}).items():
+            theme = Theme(title=theme_title, course_id=course.id)
+            db.session.add(theme)
+            db.session.flush()
+
+            for task_title, task_data in theme_data["tasks"].items():
+                print(task_title)
+                task_type = get_or_create_task_type(task_data["type"])
+                task = Task(title=task_title, type_id=task_type.id, theme_id=theme.id)
+                db.session.add(task)
+                db.session.flush()
+
+                match task_data["type"]:
+                    case "video":
+                        db.session.add(Video(task_id=task.id, path=VIDEO_PATH + task_data["video"]))
+                    case "conspect":
+                        conspect = Conspect(task_id=task.id, path=CONSPECT_PATH + task_data["conspect"])
+                        db.session.add(conspect)
+                        db.session.flush()
+                        for f in task_data.get("files", []):
+                            db.session.add(File(conspect_id=conspect.id, file_path=CONSPECT_PATH + f))
+                    case "test":
+                        test = Test(task_id=task.id)
+                        db.session.add(test)
+                        db.session.flush()
+                        for q in task_data["questions"]:
+                            question = Question(test_id=test.id, question_text=q["question_text"])
+                            db.session.add(question)
+                            db.session.flush()
+                            for option_text, option_data in q["options"].items():
+                                db.session.add(Option(
+                                    question_id=question.id,
+                                    option_text=option_text,
+                                    is_right=bool(option_data["is_right"])
+                                ))
+                    case "blocks":
+                        block_task = BlockTask(task_id=task.id)
+                        db.session.add(block_task)
+                        db.session.flush()
+                        for b in task_data["blocks"]:
+                            block_type = BlockType.query.filter_by(type=b["type"]).first()
+                            if not block_type:
+                                block_type = BlockType(type=b["type"])
+                                db.session.add(block_type)
+                                db.session.flush()
+                            db.session.add(Block(cat=b["cat"], type_id=block_type.id, block_task_id=block_task.id))
+
+    db.session.commit()
+    print("✅ JSON import complete.")
+
+def get_or_create_task_type(name):
+    tt = TaskType.query.filter_by(type=name).first()
+    if not tt:
+        tt = TaskType(type=name)
+        db.session.add(tt)
+        db.session.flush()
+    return tt

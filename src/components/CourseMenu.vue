@@ -13,7 +13,7 @@
           class="lesson-button"
           @click="selectTask(task)"
         >
-          {{ task.title }} ({{ task.type }})
+          {{ task.title }} 
         </button>
       </div>
     </div>
