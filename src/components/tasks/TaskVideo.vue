@@ -33,7 +33,7 @@ const props = defineProps({
 
 // Поддержка ссылок вида "/data/videos/lesson1.mp4"
 const computedVideoUrl = computed(() => {
-  return props.task?.content ? `${API_BASE_URL}/${props.task.content}` : ''
+  return props.task?.video_path ? `${API_BASE_URL}/${props.task.video_path}` : ''
 })
 
 const videoPlayer = ref(null)

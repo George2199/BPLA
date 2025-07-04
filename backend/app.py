@@ -60,6 +60,89 @@ def parse_content(content):
         print(f"⚠️ Ошибка парсинга контента: {e}")
         return None
     
+def serialize_course(course, include_content=False):
+    return {
+        "id": course.id,
+        "title": course.title,
+        "image_url": course.image_url,
+        "progress": course.progress,
+        "themes": [
+            {
+                "id": t.id,
+                "title": t.title,
+                "tasks": [
+                    {
+                        "id": task.id,
+                        "title": task.title,
+                        "type": task.task_type.type,
+                        **({"content": parse_content(task.content)} if include_content else {}),
+                        "video_path": task.video_task[0].path if task.task_type.type == "video" and task.video_task else None,
+                        "conspect_path": task.conspect_task[0].path if task.task_type.type == "conspect" and task.conspect_task else None,
+                        "test": (
+                            serialize_test(task.test_task[0])
+                            if task.task_type.type == "test"
+                            and task.test_task
+                            and len(task.test_task) > 0
+                            else None
+                        ),
+                        "block_task":
+                            serialize_blocks(task.block_task[0])
+                            if task.task_type.type == "blocks"
+                            and task.block_task
+                            and len(task.block_task) > 0
+                            else None
+
+                    } for task in t.tasks
+                ]
+            } for t in course.themes
+        ]
+    }
+    
+def get_video_path(task):
+    try:
+        if task.video_task.path:
+            return task.video_task.path
+    except: return None
+
+def serialize_test(test):
+
+    return {
+        "id": test.id,
+        "questions": [
+            {
+                "id": q.id,
+                "question_text": q.question_text,
+                "options": [
+                    {   "id": opt.id,
+                        "text": opt.option_text
+                    } for opt in q.options
+                    ]  # ✅ простой массив строк
+            }
+            for q in test.questions
+        ]
+    }
+
+def serialize_blocks(block_task):
+
+    return {
+        "id": block_task.id,
+        "description": block_task.description,
+        "blocks": [
+            {
+                "id": b.id,
+                "cat": b.cat,
+                "type": getattr(b.block_type, "type", None),
+                "parent_id": b.parent_id,
+            }
+            for b in block_task.blocks
+        ]
+    }
+
+@app.route('/download/conspects/<path:filename>')
+def download_conspect(filename):
+    conspects_dir = os.path.join(BASE_DIR, 'data', 'conspects')
+    return send_from_directory(conspects_dir, filename, as_attachment=True)
+    
 def update_course_progress(course_id):
     course = Course.query.get(course_id)
     if not course:
@@ -106,58 +189,18 @@ def login():
     else:
         return jsonify({"success": False, "message": "Invalid credentials"}), 401
     
-@app.route('/courses', methods=['GET'])
+@app.route('/courses')
 def get_courses():
-    courses = Course.query.order_by(Course.id).all()
-    return jsonify([
-        {
-            "id": c.id,
-            "title": c.title,
-            "image_url": c.image_url,
-            "progress": c.progress,
-            "themes": [
-                {
-                    "id": t.id,
-                    "title": t.title,
-                    "tasks": [
-                        {
-                            "id": task.id,
-                            "title": task.title,
-                            "type": task.task_type.type,
-                            "content": parse_content(task.content)
-                        } for task in t.tasks
-                    ]
-                } for t in c.themes
-            ]
-        } for c in courses
-    ])
-    
-@app.route('/courses/<int:id>', methods=['GET'])
+    courses = Course.query.all()
+    return jsonify([serialize_course(c, include_content=False) for c in courses])
+
+@app.route('/courses/<int:id>')
 def get_course_by_id(id):
     course = Course.query.get(id)
     if not course:
         return jsonify({'error': 'Курс не найден'}), 404
+    return jsonify(serialize_course(course, include_content=True))
 
-    return jsonify({
-        "id": course.id,
-        "title": course.title,
-        "image_url": course.image_url,
-        "progress": course.progress,
-        "themes": [
-            {
-                "id": t.id,
-                "title": t.title,
-                "tasks": [
-                    {
-                        "id": task.id,
-                        "title": task.title,
-                        "type": task.task_type.type,
-                        "content": parse_content(task.content),
-                    } for task in t.tasks
-                ]
-            } for t in course.themes
-        ],
-    })
 
 @app.route('/themes', methods=['GET'])
 def get_themes():
@@ -186,48 +229,40 @@ def serve_video(filename):
 
 @app.route('/submit_test', methods=['POST'])
 def submit_test():
-    import json
-
     data = request.get_json()
     answers = data.get('answers')
     task_id = data.get('task_id')
 
     task = Task.query.get(task_id)
-    if not task or task.type != 'test':
+    if not task or task.task_type.type != 'test':
         return jsonify({"success": False, "message": "Неверный task_id"}), 400
 
-    # Парсим контент
-    content = task.content
-    if isinstance(content, str):
-        try:
-            content = json.loads(content)
-        except json.JSONDecodeError:
-            return jsonify({"success": False, "message": "Невозможно прочитать контент теста"}), 500
+    test = task.test_task[0] if task.test_task else None
+    if not test:
+        return jsonify({"success": False, "message": "Тест не найден"}), 400
 
-    questions = content.get("questions", [])
+    questions = test.questions
     if len(answers) != len(questions):
-        return jsonify({"success": False, "message": "Ответов должно быть столько же, сколько вопросов"}), 400
+        return jsonify({"success": False, "message": "Количество ответов не совпадает с количеством вопросов"}), 400
 
     correct_count = 0
     details = []
 
     for i, question in enumerate(questions):
-        correct_answers = set(map(int, question.get("correct_answers", [])))
+        correct_options = {opt.id for opt in question.options if opt.is_right}
         user_answers = set(map(int, answers[i])) if isinstance(answers[i], list) else set()
 
-        is_correct = user_answers == correct_answers
-        print('usr:', user_answers, 'corr:', correct_answers)
+        is_correct = user_answers == correct_options
         if is_correct:
             correct_count += 1
 
         details.append({
-            "question": question.get("question", "???"),
+            "question": question.question_text,
             "is_correct": is_correct,
             "your": sorted(list(user_answers)),
-            "correct": sorted(list(correct_answers))
+            "correct": sorted(list(correct_options))
         })
 
-    # Сохраняем статус
     score_ratio = correct_count / len(questions)
     task.status = 'passed' if score_ratio >= 0.7 else 'failed'
     task.progress = score_ratio
@@ -235,17 +270,13 @@ def submit_test():
 
     theme = Theme.query.get(task.theme_id)
     if theme:
-     course = Course.query.get(theme.course_id)
-    if course:
-        # Пересчитать средний прогресс по всем таскам в курсе
-        all_tasks = Task.query.join(Theme).filter(Theme.course_id == course.id).all()
-        if all_tasks:
-            avg_progress = sum(t.progress for t in all_tasks) / len(all_tasks)
-            course.progress = avg_progress
-            db.session.commit()
-
-
-    update_course_progress(course.id)
+        course = Course.query.get(theme.course_id)
+        if course:
+            all_tasks = Task.query.join(Theme).filter(Theme.course_id == course.id).all()
+            if all_tasks:
+                avg_progress = sum(t.progress for t in all_tasks) / len(all_tasks)
+                course.progress = avg_progress
+                db.session.commit()
 
     return jsonify({
         "success": True,
@@ -257,7 +288,8 @@ def submit_test():
 
 @app.route('/data/conspects/<path:filename>')
 def serve_conspect(filename):
-    return send_from_directory(os.path.join(DATA_DIR, 'conspects'), filename, mimetype='text/markdown')
+    conspects_dir = os.path.join(BASE_DIR, 'data', 'conspects')
+    return send_from_directory(conspects_dir, filename, mimetype='text/markdown')
 
 @app.route('/execute', methods=['POST'])
 def execute_code():

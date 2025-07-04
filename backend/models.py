@@ -57,6 +57,8 @@ class Video(db.Model):
     task_id = db.Column(db.Integer, db.ForeignKey('tasks.id'), nullable=False)
     path = db.Column(db.String, nullable=False)
 
+    task = db.relationship('Task', backref='video_task', lazy=True)
+
 class Conspect(db.Model):
     __tablename__ = 'conspects'
     id = db.Column(db.Integer, primary_key=True)
@@ -64,6 +66,8 @@ class Conspect(db.Model):
     path = db.Column(db.String, nullable=False)
 
     files = db.relationship('File', backref='conspect', lazy=True, cascade='all, delete-orphan')
+    task = db.relationship('Task', backref='conspect_task', lazy=True)
+
 
 class File(db.Model):
     __tablename__ = 'files'
@@ -78,6 +82,7 @@ class Test(db.Model):
 
     questions = db.relationship('Question', backref='test', lazy=True, cascade='all, delete-orphan')
     save_test = db.relationship('SaveTest')
+    task = db.relationship('Task', backref='test_task', lazy=True)
 
 class Question(db.Model):
     __tablename__ = 'questions'
@@ -86,7 +91,6 @@ class Question(db.Model):
     question_text = db.Column(db.String, nullable=False)
 
     options = db.relationship('Option', backref='question', lazy=True, cascade='all, delete-orphan')
-    save_test = db.relationship('SaveTest')
 
 class Option(db.Model):
     __tablename__ = 'options'
@@ -96,7 +100,7 @@ class Option(db.Model):
     is_right = db.Column(db.Boolean, default=False)
 
     save_test = db.relationship('SaveTest')
-    
+
 class BlockType(db.Model):
     __tablename__ = 'block_types'
     id = db.Column(db.Integer, primary_key=True)
@@ -109,7 +113,6 @@ class Block(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     block_task_id = db.Column(db.Integer, db.ForeignKey('block_tasks.id'), nullable=True)
     cat = db.Column(db.String)
-
     type_id = db.Column(db.Integer, db.ForeignKey('block_types.id'), nullable=False)
 
     parent_id = db.Column(db.Integer, db.ForeignKey('blocks.id'), nullable=True)
@@ -118,9 +121,10 @@ class Block(db.Model):
 class BlockTask(db.Model):
     __tablename__ = 'block_tasks'
     id = db.Column(db.Integer, primary_key=True)
+    description = db.Column(db.String)
     task_id = db.Column(db.Integer, db.ForeignKey('tasks.id'), nullable=False)
 
-    task = db.relationship('Task')
+    task = db.relationship('Task', backref='block_task', lazy=True)
     save_blocks = db.relationship('SaveBlock', backref='block', lazy=True)
     blocks = db.relationship('Block', backref='block_task', lazy=True)
 

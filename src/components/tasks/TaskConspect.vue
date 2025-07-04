@@ -1,282 +1,82 @@
 <template>
   <div class="markdown-container">
-    <div v-if="isLoading" class="loading">
-      Загрузка конспекта...
-    </div>
-    <div v-else-if="error" class="error">
-      {{ error }}
-    </div>
+    <div v-if="isLoading" class="loading">Загрузка конспекта...</div>
+    <div v-else-if="error" class="error">{{ error }}</div>
     <div v-else class="md-content" v-html="renderedContent"></div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { marked } from 'marked'
 import api, { API_BASE_URL } from '@/api'
 
-const props = defineProps({
-  task: Object
-})
+const props = defineProps({ task: Object })
 
 const isLoading = ref(true)
 const error = ref(null)
-const mdContent = ref('')
 const renderedContent = ref('')
 
-// Получаем базовый URL API
-const apiBaseUrl = API_BASE_URL
-console.log('API URL:', apiBaseUrl);
-
-// Настраиваем marked для поддержки HTML
 marked.setOptions({
   gfm: true,
   breaks: true,
-  headerIds: true,
-  sanitize: false, // Позволяет использовать HTML
-  smartLists: true,
-  xhtml: true // Строгий XHTML
-});
+  sanitize: false,
+  xhtml: true
+})
 
-// Функция для загрузки содержимого файла по URL
-async function fetchFileContent(url) {
-  try {
-    console.log(`Загрузка файла с URL: ${apiBaseUrl}${url}`);
-    const response = await api.get(`${url}`);
-    console.log('Файл успешно загружен');
-    return response.data;
-  } catch (err) {
-    console.error(`Ошибка загрузки файла по URL ${apiBaseUrl}${url}:`, err);
-    throw new Error(`Не удалось загрузить файл ${url}: ${err.message}`);
-  }
+async function fetchFileContent(path) {
+  const response = await api.get(path)
+  return response.data
 }
 
-// Функция для активации скриптов в HTML
-function activateScripts() {
-  setTimeout(() => {
-    const scripts = document.querySelectorAll('.md-content script');
-    console.log('Найдено скриптов в контенте:', scripts.length);
-    
-    scripts.forEach((oldScript) => {
-      const newScript = document.createElement('script');
-      
-      // Копируем атрибуты из старого скрипта в новый
-      Array.from(oldScript.attributes).forEach(attr => {
-        newScript.setAttribute(attr.name, attr.value);
-      });
-      
-      // Копируем содержимое скрипта
-      newScript.innerHTML = oldScript.innerHTML;
-      
-      // Заменяем старый скрипт новым (это заставит его выполниться)
-      oldScript.parentNode.replaceChild(newScript, oldScript);
-    });
-  }, 500);
+function prepareMarkdown(md) {
+  return md
+    .replace(/!\[(.*?)\]\(\/data\/(.*?)\)/g, `![$1](${API_BASE_URL}/data/$2)`)
+    .replace(/<img\s+src="\/data\/(.*?)"/g, `<img src="${API_BASE_URL}/data/$1"`)
 }
 
-// Добавляем глобальную функцию для скачивания любого контента
-window.downloadAnyContent = function(url, filename) {
-  try {
-    console.log(`Скачивание контента: ${url}, имя файла: ${filename}`);
-    
-    const fullUrl = url.startsWith('http') ? url : `${apiBaseUrl}${url}`;
-    
-    // Используем fetch для получения контента как blob
-    fetch(fullUrl)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP ошибка! статус: ${response.status}`);
-        }
-        return response.blob();
-      })
-      .then(blob => {
-        // Создаем объект URL из blob
-        const blobUrl = window.URL.createObjectURL(blob);
-        
-        // Создаем временную ссылку для скачивания
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = blobUrl;
-        a.download = filename || 'download'; // Используем имя файла или 'download' по умолчанию
-        
-        // Добавляем ссылку в DOM, кликаем и удаляем
-        document.body.appendChild(a);
-        a.click();
-        
-        // Очищаем ресурсы
-        setTimeout(() => {
-          window.URL.revokeObjectURL(blobUrl);
-          document.body.removeChild(a);
-        }, 100);
-        
-        console.log('Скачивание инициировано успешно');
-      })
-      .catch(error => {
-        console.error('Ошибка при скачивании:', error);
-        alert(`Не удалось скачать файл: ${error.message}`);
-      });
-  } catch (e) {
-    console.error('Общая ошибка в функции скачивания:', e);
-    alert(`Произошла ошибка: ${e.message}`);
-  }
-};
-
-// Обработка клика по ссылкам с атрибутом download
 function setupDownloadLinks() {
   setTimeout(() => {
-    const links = document.querySelectorAll('.md-content a[download]');
-    console.log('Найдено ссылок для скачивания:', links.length);
-    
-    links.forEach((link) => {
-      const originalHref = link.getAttribute('href');
-      // Преобразуем относительные пути в абсолютные
-      if (originalHref && originalHref.startsWith('/data/')) {
-        const fullUrl = `${apiBaseUrl}${originalHref}`;
-        
-        // Меняем обработчик клика для гарантированного скачивания
-        link.addEventListener('click', (e) => {
-          e.preventDefault();
-          console.log(`Скачивание файла: ${fullUrl}`);
-          
-          // Создаем невидимый iframe для скачивания
-          const iframe = document.createElement('iframe');
-          iframe.style.display = 'none';
-          iframe.src = fullUrl;
-          document.body.appendChild(iframe);
-          
-          // Удаляем iframe после начала загрузки
-          setTimeout(() => {
-            document.body.removeChild(iframe);
-          }, 2000);
-          
-          // Также открываем в новой вкладке для надежности
-          window.open(fullUrl, '_blank');
-        });
+    const links = document.querySelectorAll('.md-content a[download]')
+    links.forEach(link => {
+      const href = link.getAttribute('href')
+      if (href?.startsWith('/data/')) {
+        const fullUrl = `${API_BASE_URL}/download${href}`
+        link.addEventListener('click', e => {
+          e.preventDefault()
+          const a = document.createElement('a')
+          a.href = fullUrl
+          a.download = link.getAttribute('download') || ''
+          a.style.display = 'none'
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+        })
       }
-    });
-  }, 1000);
+    })
+  }, 500)
 }
 
-// Использовать стандартный синтаксис marked без кастомного рендерера
 onMounted(async () => {
-  try {
-    console.log('TaskConspect mounted, task:', props.task);
-    
-    if (!props.task?.content) {
-      error.value = 'Не указан контент конспекта';
-      console.error('Ошибка: Не указан контент конспекта', props.task);
-      isLoading.value = false;
-      return;
-    }
-
-    console.log('Тип контента:', typeof props.task.content);
-
-    // Определяем, откуда брать контент
-    if (typeof props.task.content === 'object' && props.task.content.text) {
-      // Если контент - объект с полем text
-      mdContent.value = props.task.content.text;
-      console.log('Используем текст из объекта');
-    } else if (typeof props.task.content === 'string') {
-      // Если контент - строка URL, загружаем содержимое файла
-      const contentPath = props.task.content;
-      console.log('Путь к контенту:', contentPath);
-      
-      if (contentPath.startsWith('/data/')) {
-        try {
-          const fileContent = await fetchFileContent(contentPath);
-          mdContent.value = fileContent;
-          console.log('Загружен файл, первые 100 символов:', 
-            typeof fileContent === 'string' ? fileContent.substring(0, 100) + '...' : 'Не строка');
-        } catch (err) {
-          console.error('Ошибка при загрузке файла:', err);
-          error.value = `Ошибка загрузки файла: ${err.message}`;
-          isLoading.value = false;
-          return;
-        }
-      } else {
-        // Если это просто текст, используем его напрямую
-        mdContent.value = props.task.content;
-        console.log('Используем текст напрямую');
-      }
-    } else {
-      error.value = 'Неверный формат контента конспекта';
-      console.error('Ошибка: Неверный формат контента конспекта', props.task.content);
-      isLoading.value = false;
-      return;
-    }
-    
-    try {
-      // Проверяем, что mdContent - строка
-      if (typeof mdContent.value !== 'string') {
-        console.warn('mdContent не является строкой:', mdContent.value);
-        mdContent.value = String(mdContent.value || '');
-      }
-      
-      // Заменяем пути к изображениям в Markdown перед рендерингом
-      console.log('Обработка путей изображений');
-      const processedContent = mdContent.value.replace(/!\[(.*?)\]\(\/data\/(.*?)\)/g, 
-        (match, alt, path) => `![${alt}](${apiBaseUrl}/data/${path})`);
-      
-      // Также заменяем HTML-синтаксис для изображений
-      const finalContent = processedContent.replace(
-        /<img\s+src="\/data\/(.*?)"/g, 
-        `<img src="${apiBaseUrl}/data/$1"`
-      );
-      
-      console.log('Обработанный контент (начало):', finalContent.substring(0, 150));
-      
-      // Используем библиотеку marked для рендеринга Markdown
-      console.log('Начинаем рендеринг Markdown');
-      renderedContent.value = marked.parse(finalContent);
-      console.log('Рендеринг успешно завершен');
-      
-      // Активируем скрипты в HTML
-      activateScripts();
-      
-      // Настраиваем обработчики для скачивания файлов
-      setupDownloadLinks();
-      
-      // Добавляем обработчик событий для контроля загрузки изображений
-      setTimeout(() => {
-        const images = document.querySelectorAll('.md-content img');
-        console.log('Найдено изображений:', images.length);
-        
-        images.forEach((img, index) => {
-          console.log(`Изображение ${index + 1}:`, img.src);
-          
-          img.onerror = function() {
-            console.error(`Ошибка загрузки изображения: ${img.src}`);
-            img.style.border = '2px solid red';
-            img.style.padding = '5px';
-            img.title = 'Ошибка загрузки';
-          };
-          
-          img.onload = function() {
-            console.log(`Изображение успешно загружено: ${img.src}`);
-          };
-        });
-      }, 500);
-      
-      if (renderedContent.value) {
-        console.log('Результат рендеринга (первые 100 символов):', 
-          renderedContent.value.substring(0, 100) + '...');
-      } else {
-        console.warn('Результат рендеринга пустой');
-      }
-    } catch (renderErr) {
-      console.error('Ошибка рендеринга Markdown:', renderErr);
-      error.value = `Ошибка рендеринга Markdown: ${renderErr.message}`;
-      isLoading.value = false;
-      return;
-    }
-    
-    isLoading.value = false;
-  } catch (err) {
-    console.error('Общая ошибка обработки конспекта:', err);
-    error.value = 'Ошибка обработки конспекта. Пожалуйста, попробуйте позже.';
-    isLoading.value = false;
+  const path = props.task?.conspect_path
+  if (!path) {
+    error.value = 'Конспект не найден'
+    isLoading.value = false
+    return
   }
-});
+
+  try {
+    const raw = await fetchFileContent(path)
+    const markdown = prepareMarkdown(String(raw || ''))
+    renderedContent.value = marked.parse(markdown)
+    setupDownloadLinks()
+  } catch (e) {
+    error.value = `Ошибка загрузки: ${e.message}`
+  } finally {
+    isLoading.value = false
+  }
+})
+
 </script>
 
 <style>

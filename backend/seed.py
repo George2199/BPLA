@@ -210,7 +210,8 @@ def gpt_seed_from_json(data):
                                     is_right=bool(option_data["is_right"])
                                 ))
                     case "blocks":
-                        block_task = BlockTask(task_id=task.id)
+                        description=task_data['description']
+                        block_task = BlockTask(task_id=task.id, description=description)
                         db.session.add(block_task)
                         db.session.flush()
                         for b in task_data["blocks"]:

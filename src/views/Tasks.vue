@@ -58,7 +58,7 @@ const componentsMap = {
   test: TaskTest,
   practical: TaskPractical,
   summary: TaskSummary,
-  block: TaskBlock,
+  blocks: TaskBlock,
   conspect: TaskConspect,
 }
 

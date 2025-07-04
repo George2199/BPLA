@@ -1,42 +1,65 @@
 <template>
   <div class="test-card">
-  
-
     <h2>{{ task?.title || 'Тест' }}</h2>
     <div class="kunt">
       <ManySelect
         v-for="(q, i) in questions"
         :key="i"
-        :question="q.question"
+        :question="q.question_text"
         :options="q.options"
         :model-value="answers[i]"
         @update:model-value="val => answers[i] = val"
-       />
-       <div class="under_kunt_for_button">
-      <button class="submit-btn" :disabled="!canSubmit" @click="submitTest">Сдать</button>
-
+      />
+      <div class="under_kunt_for_button">
+        <button class="submit-btn" :disabled="!canSubmit" @click="submitTest">Сдать</button>
+      </div>
     </div>
-    </div>
 
-   
-     
     <div v-if="result">
       <p class="result_p">Результат: {{ result.score }} из {{ result.total }}</p>
       <p class="result_p">Прогресс: {{ (result.progress * 100).toFixed(0) }}%</p>
       <div class="progress-bar">
-    <div class="progress-fill" :style="{ width: (result.progress * 100) + '%' }"></div>
-  </div>
-      
+        <div class="progress-fill" :style="{ width: (result.progress * 100) + '%' }"></div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch, computed, } from 'vue'
+import { ref, watch, computed } from 'vue'
 import ManySelect from './testBlocks/ManySelect.vue'
 import api from '@/api'
 
 const result = ref(null)
+
+const props = defineProps({
+  task: {
+    type: Object,
+    required: true
+  }
+})
+
+const questions = ref([])
+const answers = ref([])
+
+watch(
+  () => props.task,
+  (newTask) => {
+    if (newTask?.test?.questions) {
+      questions.value = newTask.test.questions.map(q => ({
+        question_text: q.question_text,
+        options: q.options.map(opt => ({ id: opt.id, text: opt.text }))
+      }))
+      answers.value = questions.value.map(() => [])
+    }
+  },
+  { immediate: true }
+)
+
+
+const canSubmit = computed(() =>
+  answers.value.some(a => Array.isArray(a) && a.length > 0)
+)
 
 async function submitTest() {
   try {
@@ -60,35 +83,8 @@ async function refreshCourses() {
     console.error('❌ Не удалось обновить курсы:', e)
   }
 }
-
-
-const props = defineProps({
-  task: {
-    type: Object,
-    required: true
-  }
-})
-
-
-const visible = ref(true)
-const questions = ref([])
-const answers = ref([])
-
-const canSubmit = computed(() =>
-  answers.value.some(a => Array.isArray(a) && a.length > 0)
-)
-
-watch(
-  () => props.task,
-  (newTask) => {
-    if (newTask?.content?.questions) {
-      questions.value = newTask.content.questions
-      answers.value = newTask.content.questions.map(() => []) // Новый массив на каждый вопрос
-    }
-  },
-  { immediate: true }
-)
 </script>
+
   
   
 <style scoped>

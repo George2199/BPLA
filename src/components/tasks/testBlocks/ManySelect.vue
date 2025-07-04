@@ -3,17 +3,17 @@
     <p><strong>{{ question }}</strong></p>
     <label
       v-for="(option, index) in options"
-      :key="index"
+      :key="option.id"
       class="option"
     >
     <input
       type="checkbox"
-      :value="index"
-      :checked="modelValue.includes(index)"
-      @change="onChange(index, $event)"
+      :value="option.id"
+      :checked="modelValue.includes(option.id)"
+      @change="onChange(option.id, $event)"
     />
 
-      {{ option }}
+      {{ option.text }}
     </label>
   </div>
   

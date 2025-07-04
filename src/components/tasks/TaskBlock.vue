@@ -1,7 +1,7 @@
 <template>
   <div class="task-block-container" @keydown="handleKey" tabindex="0">
-    <p class="description" v-if="task?.content?.description">
-      {{ task.content.description }}
+    <p class="description" v-if="task?.block_task?.description">
+      {{ task.block_task.description }}
     </p>
 
     <div class="blocks-wrapper">
@@ -56,7 +56,7 @@
 
 <script setup>
 import api from '@/api'
-import { ref, onMounted } from 'vue'
+import { ref, watch } from 'vue'
 import draggable from 'vuedraggable'
 import { consoleOutput, showConsole } from '@/store/console'
 import BlockItem from './blockBlocks/BlockItem.vue'
@@ -93,14 +93,54 @@ const prepareBlock = (block, level = 0) => {
   const newBlock = {
     ...block,
     id: generateId(),
-    indentLevel: level
-  }
-  if (block.type === 'container' && Array.isArray(block.children)) {
-    newBlock.children = block.children.map(child => prepareBlock(child, level + 1))
+    indentLevel: level,
+    type: block.type,
+    content: block.type === 'code' ? block.cat : undefined,
+    label: block.type === 'container' ? block.cat : undefined,
+    children: []
   }
   return newBlock
 }
 
+const buildTree = (flatBlocks) => {
+  const idToBlock = {}
+  flatBlocks.forEach(raw => {
+    const block = prepareBlock(raw)
+    idToBlock[raw.id] = block
+  })
+
+  const rootBlocks = []
+
+  flatBlocks.forEach(raw => {
+    const block = idToBlock[raw.id]
+    const parent = raw.parent_id ? idToBlock[raw.parent_id] : null
+    if (parent && parent.type === 'container') {
+      parent.children = parent.children || []
+      parent.children.push(block)
+    } else {
+      rootBlocks.push(block)
+    }
+  })
+
+  return rootBlocks
+}
+
+// ====== РЕАКТИВНАЯ ЗАГРУЗКА БЛОКОВ ======
+watch(
+  () => props.task,
+  (newTask) => {
+    const rawBlocks = newTask?.block_task?.blocks || []
+    const tree = buildTree(rawBlocks)
+    originalBlocks.value = tree
+    shuffledBlocks.value = [...tree].sort(() => Math.random() - 0.5)
+    answerBlocks.value = []
+    selectedBlockId.value = null
+    selectedFromAnswer.value = true
+  },
+  { immediate: true }
+)
+
+// ====== ОБРАБОТКА ВЫБОРА ======
 const selectBlock = (id, fromAnswer = true) => {
   selectedBlockId.value = id
   selectedFromAnswer.value = fromAnswer
@@ -120,7 +160,7 @@ const findBlockAndParent = (blocks, id) => {
   return null
 }
 
-// ====== ЛОГИЧЕСКИЕ ======
+// ====== КЛАВИШИ И НАВИГАЦИЯ ======
 const handleKey = (event) => {
   if (!selectedBlockId.value) return
 
@@ -136,16 +176,6 @@ const handleKey = (event) => {
 
   const isAlt = event.altKey
   const isShift = event.shiftKey
-
-  console.log('👉 handleKey', {
-    key: event.key,
-    alt: isAlt,
-    shift: isShift,
-    ctrl: event.ctrlKey,
-    selectedBlockId: selectedBlockId.value,
-    selectedFromAnswer: selectedFromAnswer.value,
-    currentList,
-  })
 
   const moveSelection = (direction) => {
     const newIndex = index + direction
@@ -168,67 +198,25 @@ const handleKey = (event) => {
     const source = fromAnswer ? answerBlocks.value : shuffledBlocks.value
     const target = fromAnswer ? shuffledBlocks.value : answerBlocks.value
 
-    console.log('💣 TRANSFER START')
-    console.log('source:', source)
-    console.log('target:', target)
-    console.log('selected index:', index)
-    console.log('selected id:', selectedBlockId.value)
-
-    if (!Array.isArray(source) || !Array.isArray(target)) {
-      console.error('🔥 source или target НЕ массивы', { source, target })
-      return
-    }
-
     const [moved] = source.splice(index, 1)
-    if (!moved) {
-      console.error('❌ НИЧЕГО НЕ ПЕРЕМЕСТИЛОСЬ')
-      return
-    }
+    if (!moved) return
 
     target.push(moved)
     selectedBlockId.value = moved.id
     selectedFromAnswer.value = toAnswer
-
-    console.log('✅ TRANSFER SUCCESS')
-    console.log('new source:', source)
-    console.log('new target:', target)
   }
 
-  // =================== ALT-логика ===================
+  // ALT + стрелки: перенос и перемещение
   if (isAlt) {
-    if (event.key === 'ArrowUp') {
-      event.preventDefault()
-      moveBlock(-1)
-      return
-    }
-    if (event.key === 'ArrowDown') {
-      event.preventDefault()
-      moveBlock(1)
-      return
-    }
-    if (event.key === 'ArrowRight') {
-      event.preventDefault()
-      if (fromAnswer) transferBlock(false)
-      return
-    }
-    if (event.key === 'ArrowLeft') {
-      event.preventDefault()
-      if (!fromAnswer) transferBlock(true)
-      return
-    }
+    if (event.key === 'ArrowUp') return event.preventDefault(), moveBlock(-1)
+    if (event.key === 'ArrowDown') return event.preventDefault(), moveBlock(1)
+    if (event.key === 'ArrowRight' && fromAnswer) return event.preventDefault(), transferBlock(false)
+    if (event.key === 'ArrowLeft' && !fromAnswer) return event.preventDefault(), transferBlock(true)
   }
 
-  // =================== Навигация ===================
-  if (event.key === 'ArrowUp') {
-    event.preventDefault()
-    moveSelection(-1)
-    return
-  }
-  if (event.key === 'ArrowDown') {
-    event.preventDefault()
-    moveSelection(1)
-    return
-  }
+  // Просто навигация
+  if (event.key === 'ArrowUp') return event.preventDefault(), moveSelection(-1)
+  if (event.key === 'ArrowDown') return event.preventDefault(), moveSelection(1)
   if (event.key === 'ArrowLeft') {
     event.preventDefault()
     if (!fromAnswer && answerBlocks.value.length > 0) {
@@ -246,24 +234,19 @@ const handleKey = (event) => {
     return
   }
 
-  // =================== Tabulation (только для ответа) ===================
+  // Tab/Shift+Tab для отступов
   if (event.key === 'Tab' && fromAnswer) {
     event.preventDefault()
     const block = currentList[index]
     if (block) {
-      if (isShift) {
-        decreaseIndent(block)
-      } else {
-        increaseIndent(block)
-      }
+      isShift ? decreaseIndent(block) : increaseIndent(block)
     }
   }
 
-  // =================== ENTER — Запуск кода ===================
+  // ENTER = запуск
   if (event.key === 'Enter') {
     event.preventDefault()
     runCode()
-    return
   }
 }
 
@@ -274,6 +257,7 @@ const decreaseIndent = (block) => {
   if (block.indentLevel > 0) block.indentLevel--
 }
 
+// ====== ЗАПУСК КОДА ======
 const runCode = async () => {
   const buildCode = (blocks, baseIndent = 0) => {
     let lines = []
@@ -296,6 +280,7 @@ const runCode = async () => {
     consoleOutput.value = '⚠️ нет кода для запуска.'
     return
   }
+
   try {
     isRunning.value = true
     consoleOutput.value = ''
@@ -309,14 +294,6 @@ const runCode = async () => {
     showConsole()
   }
 }
-
-// ====== INIT ======
-onMounted(async () => {
-  const blocks = props.task?.content?.blocks || []
-  originalBlocks.value = blocks.map(b => prepareBlock(b))
-  shuffledBlocks.value = [...originalBlocks.value].sort(() => Math.random() - 0.5)
-})
-
 </script>
 
 
