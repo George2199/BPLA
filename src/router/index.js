@@ -8,7 +8,7 @@ const routes = [
   meta: {
     title: 'Вход',
     hasHeader: false,
-    fullscreen: true // 👈 вот это
+    fullscreen: false// 👈 вот это
   }
 },
   {

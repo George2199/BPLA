@@ -110,10 +110,11 @@ onMounted(async () => {
 
 /* 🔹 Главный контейнер */
 .app-container {
+  background-color:#08000e;
   flex-grow: 1;
   display: flex;
   min-height: 100vh; /* 👈 вместо height: 100vh */
-  background: linear-gradient(to bottom right, var(--grad_color_left), var(--grad_color_right));
+  /* background: linear-gradient(to bottom right, var(--grad_color_left), var(--grad_color_right)); */
   color: white;
 }
 

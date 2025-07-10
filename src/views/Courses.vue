@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
       
-  <!-- <TatliStarts /> -->
+   <!-- <TatliStarts />  -->
     <div class="main-content">
   <Shlyapabar />
 

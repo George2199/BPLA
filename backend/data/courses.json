@@ -63,7 +63,7 @@
                                             "type": "container"
                                         },
                                         {
-                                            "cat": "print('Hello, World!",
+                                            "cat": "print('Hello, World!')",
                                             "type": "code"
                                         },
                                         {
@@ -144,6 +144,12 @@
         {
             "title": "Управление БПЛА",
             "image": "Drone.png",
+            "progress": 0.7
+        },
+         "Новое":
+        {
+            "title": "Новое",
+            "image": "images.jpeg",
             "progress": 0.7
         }
 

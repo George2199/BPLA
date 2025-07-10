@@ -1,7 +1,5 @@
-
 <template>
-  
-  <!-- <TatliStarts /> -->
+<!--<TatliStarts />  -->
 
   <div class="aerocos">АэроКосмос</div>
     
@@ -64,7 +62,7 @@
 
 <script setup>
 import api from '@/api'
-import StarField from '@/components/StarField.vue'
+// import StarField from '@/components/StarField.vue' ебанутые маленькие шарики (гоша я скучаю)
 import TatliStarts from '@/components/TatliStarts.vue'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -99,6 +97,7 @@ async function handleSubmit () {
 .auth-wrapper {
   display: inline-block;
   text-align: left;
+  padding-left: 1250px;
 }
 
 .pw-wrapper {
@@ -132,7 +131,7 @@ async function handleSubmit () {
   font-size: 110px;
  padding-right: 400px;
  margin-top: 150px;
-  position:relative;        /* нужно, чтобы ::after позиционировался от заголовка */
+  position:absolute;        /* нужно, чтобы ::after позиционировался от заголовка */
   display:inline-block; 
   color: #EDEFFF;
 
@@ -142,7 +141,7 @@ async function handleSubmit () {
   content:"";
   position:absolute;
   left:0;                   /* линия начинается ровно под первой буквой */
-  bottom:515px;             /* на 40 px ниже текста — меняй по вкусу */
+  bottom:-180px;             /* на 40 px ниже текста — меняй по вкусу */
   width:1150px;             /* длина линии; сделай 600-1200 px как надо */
   height:1px;
   background:rgba(255, 255, 255, 0.842);  /* тонкая полупрозрачная полоса */

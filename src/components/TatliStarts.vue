@@ -4,18 +4,13 @@
 
 <script setup>
 import { onMounted, onBeforeUnmount, ref } from 'vue'
+import { shared } from '@/components/glowState'
 
 const cv = ref(null)
-let ctx, glows = [], raf
+let ctx, raf
 
 const AMOUNT = 4
-const COLORS = [  '#c4affa',  // сиреневый
-  '#3f14a5',  // тёмно-фиолетовый
-  '#7b5bff',  // индиго
-  
-  '#ff7de9',  // малиновый
-  '#ffc371',  // персик
-  ]
+const COLORS = ['#c4affa', '#3f14a5', '#7b5bff', '#ff7de9', '#ffc371']
 const MIN_RADIUS = 400
 const MAX_RADIUS = 1000
 const SPEED = 2
@@ -25,25 +20,22 @@ class Glow {
     this.r = rand(MIN_RADIUS, MAX_RADIUS)
     this.x = rand(0, w)
     this.y = rand(0, h)
-  this.vx = rand(-SPEED, SPEED)
-this.vy = rand(-SPEED, SPEED)
-
+    this.vx = rand(-SPEED, SPEED)
+    this.vy = rand(-SPEED, SPEED)
     this.c = COLORS[Math.floor(Math.random() * COLORS.length)]
   }
 
   move(w, h) {
     this.x += this.vx
     this.y += this.vy
-    // reflect softly from edges
     if (this.x < -this.r || this.x > w + this.r) this.vx *= -1
     if (this.y < -this.r || this.y > h + this.r) this.vy *= -1
   }
 
-  draw() {
+  draw(ctx) {
     const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.r)
     grad.addColorStop(0, hexToRGBA(this.c, 0.4))
     grad.addColorStop(1, hexToRGBA(this.c, 0))
-
     ctx.fillStyle = grad
     ctx.beginPath()
     ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2)
@@ -64,35 +56,41 @@ function hexToRGBA(hex, alpha) {
 }
 
 function tick() {
+  if (!ctx || !cv.value) return
+  const w = cv.value.width
+  const h = cv.value.height
 
-  const { width: w, height: h } = cv.value
   ctx.clearRect(0, 0, w, h)
-
-  glows.forEach(g => {
+  shared.glows.forEach(g => {
     g.move(w, h)
-    g.draw()
+    g.draw(ctx)
   })
 
   raf = requestAnimationFrame(tick)
+  shared.raf = raf
 }
 
 function resize() {
+  if (!ctx || !cv.value) return
   const dpr = window.devicePixelRatio || 1
   cv.value.width = innerWidth * dpr
   cv.value.height = innerHeight * dpr
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
 
-  glows = []
+  shared.glows.length = 0
   for (let i = 0; i < AMOUNT; i++) {
-    glows.push(new Glow(innerWidth, innerHeight))
+    shared.glows.push(new Glow(innerWidth, innerHeight))
   }
 }
 
 onMounted(() => {
   ctx = cv.value.getContext('2d')
+  shared.ctx = ctx
+  shared.canvas = cv.value
   resize()
   window.addEventListener('resize', resize)
   raf = requestAnimationFrame(tick)
+  shared.raf = raf
 })
 
 onBeforeUnmount(() => {
@@ -105,7 +103,7 @@ onBeforeUnmount(() => {
 .royal-canvas {
   position: fixed;
   inset: 0;
-  z-index: -10;
+  z-index: 0;
   pointer-events: none;
 }
 </style>

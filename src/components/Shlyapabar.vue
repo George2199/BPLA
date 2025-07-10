@@ -1,8 +1,6 @@
 <template>
   <div class="shlyapabar">
-    <button class="sidebar-button">
-      <img :src="icons[0]" alt="Меню" class="sidebar-icon" />
-    </button>
+    <button class="shlyapa-button">меню</button>
 
     <router-link to="/courses" class="sidebar-link">
 
@@ -78,6 +76,19 @@ watchEffect(() => {
 
   
   <style>
+
+  .shlyapa-button {
+  width: 70px;
+  padding: 10px;
+  font-size: 20px;
+  background-color: #501FD2;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 0px;
+}
+
   .shlyapabar {
     position: fixed;
     top: 0;
