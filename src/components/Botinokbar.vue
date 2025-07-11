@@ -1,21 +1,15 @@
 <template>
-  <div class="shlyapabar">
+  <div class="botinokbar">
     <div class="buttons_kunt">
 
-      <router-link to="/courses" class="sidebar-link">
+    <button class="botinokbar-button">Чат с куратором</button>
 
-        <button class="shlyapa-button">Курсы</button>
-      </router-link>
-
-        <button class="shlyapa-button">IDE</button>
-
-        <button class="shlyapa-button" @click="toggleConsole">Консоль</button>
-      
-        <button class="shlyapa-button">Симулятор</button>
+    <button class="botinokbar-button">Настройки</button>
 
     </div> 
   </div>
 </template>
+
 
 <script setup>
 import { toggleConsole } from '@/store/console'
@@ -27,30 +21,11 @@ const route = useRoute()
 const courseTitle = ref('')
 
 
-
-// Загружаем название курса по ID
-const fetchCourseTitle = async (id) => {
-  try {
-    const response = await api.get(`/courses/${id}`)
-    courseTitle.value = response.data.title
-  } catch (err) {
-    console.error('Ошибка при загрузке курса:', err)
-    courseTitle.value = 'Курс'
-  }
-}
-
-// Когда маршрут меняется — проверяем, надо ли загружать курс
-watchEffect(() => {
-  if (route.name === 'course' && route.params.id) {
-    fetchCourseTitle(route.params.id)
-  }
-})
 </script>
 
-  
   <style>
 
-  .shlyapa-button {
+ .botinokbar-button {
   cursor: pointer;
   margin-top: 25px;
   width: 200px;
@@ -65,22 +40,21 @@ watchEffect(() => {
   /* transition: border-color 0.2s, box-shadow 0.2s; */
 }
 
-  .shlyapa-button:hover{
+  .botinokbar-button:hover{
   background-color: #501FD2;
   border: 1px solid #501FD2; 
 
   }
 
   .buttons_kunt{
-  padding-left: 75px;
-  padding-top: 60px;
+  padding-right: 130px;
+  padding-bottom: 80px;
   /* margin-bottom: 60px; */
 
   }
-  .shlyapabar {
+  .botinokbar {
     position: fixed;
-    top: 20px;
-    left: 0;
+    bottom: 0;
     right: 0;
     height: 80px;
     background: transparent;
@@ -88,6 +62,7 @@ watchEffect(() => {
     align-items: center;
     z-index: 0;
     box-sizing: border-box;
+    padding-bottom: 4%;
   }
 
   </style>

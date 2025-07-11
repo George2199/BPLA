@@ -6,27 +6,21 @@
   <Shlyapabar />
 
       <CoursesIcons/>
+
+        <Botinokbar />
     </div>
   </div>
 </template>
 
 <script setup>
 import Shlyapabar from '@/components/Shlyapabar.vue';
+import Botinokbar from '@/components/Botinokbar.vue';
 import CoursesIcons from '@/components/CoursesIcons.vue';
-import StarField from '@/components/StarField.vue'
-import TatliStarts from '@/components/TatliStarts.vue'
+// import StarField from '@/components/StarField.vue'
+// import TatliStarts from '@/components/TatliStarts.vue'
 </script>
 
 <style scoped>
-/* 🔹 Главный контейнер */
-.app-container {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  /* background: linear-gradient(to bottom right, var(--grad_color_left), var(--grad_color_right)); */
-  color: white;
-  margin-top: 0;
-}
 
 /* 🔹 Основной контент */
 .main-content {
@@ -36,7 +30,8 @@ import TatliStarts from '@/components/TatliStarts.vue'
   flex-direction: column;
   overflow-y:auto;
   width: 100%;
-  padding-top: 30px;
+  padding-top: 100px; 
+  padding-left: 100px;
 }
 
 :global(body) {
