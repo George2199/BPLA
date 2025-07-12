@@ -47,7 +47,9 @@ with app.app_context():
         seed.seed_courses()
         print("[INFO] Initialization complete.")
     except Exception as e:
-        print(f"[ERROR] Initialization failed: {e}")
+        import traceback
+        print("[ERROR] Initialization failed.")
+        traceback.print_exc()
 
 CORS(app, resources={r"/*": {"origins": "*"}})
 
@@ -57,7 +59,7 @@ def parse_content(content):
             return json.loads(content)
         return content
     except Exception as e:
-        print(f"⚠️ Ошибка парсинга контента: {e}")
+        print(f"Ошибка парсинга контента: {e}")
         return None
     
 def serialize_course(course, include_content=False):
