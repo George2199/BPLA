@@ -12,6 +12,10 @@
         <button class="shlyapa-button" @click="toggleConsole">Консоль</button>
       
         <button class="shlyapa-button">Симулятор</button>
+      
+    </div>
+                <div class="custom-slot-right">
+                      <slot name="course-menu"></slot>
 
     </div> 
   </div>
@@ -74,6 +78,7 @@ watchEffect(() => {
   .buttons_kunt{
   padding-left: 75px;
   padding-top: 60px;
+   padding-bottom: 10px;
   /* margin-bottom: 60px; */
 
   }
@@ -81,13 +86,21 @@ watchEffect(() => {
     position: fixed;
     top: 20px;
     left: 0;
-    right: 0;
+    width: 100%;
     height: 80px;
     background: transparent;
     display: flex;
     align-items: center;
     z-index: 0;
     box-sizing: border-box;
+  }
+
+
+  .custom-slot-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 25px;
   }
 
   </style>

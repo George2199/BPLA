@@ -103,7 +103,7 @@ onBeforeUnmount(() => {
 .royal-canvas {
   position: fixed;
   inset: 0;
-  z-index: 0;
+  z-index: -2;
   pointer-events: none;
 }
 </style>

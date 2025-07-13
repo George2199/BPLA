@@ -1,10 +1,18 @@
 <template>
   <div class="course-menu">
-    <div class="topic-container" v-for="(theme, index) in themes" :key="theme.id" >
-      <button @click="toggleTopic(index)" class="topic-button">
+    <div
+      v-for="(theme, index) in themes"
+      :key="theme.id"
+      class="tab-wrapper"
+    >
+      <div
+        class="topic-button"
+        :class="{ active: openedTopics.includes(index) }"
+        @click="toggleTopic(index)"
+      >
         {{ theme.title }}
-        <span>{{ openedTopics.includes(index) ? '▲' : '▼' }}</span>
-      </button>
+        <div class="triangle" v-if="openedTopics.includes(index)" />
+      </div>
 
       <div v-if="openedTopics.includes(index)" class="lessons-list">
         <button
@@ -13,7 +21,7 @@
           class="lesson-button"
           @click="selectTask(task)"
         >
-          {{ task.title }} 
+          {{ task.title }}
         </button>
       </div>
     </div>
@@ -37,9 +45,9 @@ const openedTopics = ref([])
 const toggleTopic = (index) => {
   const idx = openedTopics.value.indexOf(index)
   if (idx === -1) {
-    openedTopics.value.push(index)
+    openedTopics.value = [index] // 👈 открываем только одну тему
   } else {
-    openedTopics.value.splice(idx, 1)
+    openedTopics.value = []
   }
 }
 
@@ -48,60 +56,99 @@ const selectTask = (task) => {
 }
 </script>
 
+<style scoped>
 
-<style>
-/* Контейнер меню */
 .course-menu {
-  width: 300px;
-  border-radius: 8px;
-}
-
-/* Кнопки тем */
-.topic-button {
-  width: 100%;
-  background: var(--topic_button_color);
-  color: white;
-  padding: 10px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  text-align: left;
-  font-size: 16px;
-  margin-bottom: 5px;
   display: flex;
-  justify-content: space-between;
+  gap: 15px;
+  padding: 0 60px;
+  margin-top: 30px;
 }
 
-.topic-button:hover {
-  background: var(--topic_button_color_hover);
+.tab-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
 }
 
-/* Список уроков */
-.lessons-list {
-  margin-left: 15px;
-  margin-top: 5px;
-}
-
-/* Кнопки уроков */
-.lesson-button {
-  width: 100%;
-  background: var(--lesson_button);
-  color: white;
-  padding: 8px;
+.topic-button {
+  background: transparent;
   border: none;
-  border-radius: 5px;
+  color: #EDEFFF; /* 👈 всегда светлый текст */
   cursor: pointer;
+  font-size: 18px;
+  padding-bottom: 24px;
+  position: relative;
+  width: 250px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+
+
+/* Подчеркивание */
+.topic-button::after {
+  content: "";
+  position: absolute;
+  bottom: 12px;
+  left: 0;
+  width: 250px;
+  height: 2px;
+  background-color: #CDBDF5;
+}
+
+.topic-button.active::after {
+  background-color: #501FD2; /* активный — фиолетовый */
+}
+
+/* Треугольник один — внизу */
+.topic-button::before {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 40px solid transparent;
+  border-right: 40px solid transparent;
+}
+
+.topic-button.active::before {
+  border-bottom: 15px solid #501FD2; /* нормальный треугольник */
+}
+
+.topic-button:not(.active)::before {
+  border-top: 15px solid #CDBDF5; /* перевёрнутый */
+}
+
+/* Выпадающий список заданий */
+.lessons-list {
+  position: absolute;
+  top: calc(100% + 16px);
+  background-color: var(--lesson_button);
+  padding: 10px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  min-width: 260px;
+}
+
+.lesson-button {
+  background: transparent;
+  border: none;
+  color: white;
   text-align: left;
-  font-size: 14px;
-  margin-top: 3px;
+  padding: 8px;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .lesson-button:hover {
   background: var(--lesson_button_hover);
-}
-
-.topic-container {
-  margin-bottom: 5px; /* или сколько нужно */
 }
 
 </style>

@@ -1,14 +1,26 @@
 <template>
   <div class="app-container">
-    <Shlyapabar />
+      <Shlyapabar>
+        <template #course-menu>
+          <CourseMenu
+            :themes="course?.themes || []"
+            @select-task="setSelectedTask"
+          />
+        </template>
+      </Shlyapabar>
 
-    <div class="main-content">
-      <div class="content-wrapper">
-        <CourseMenu
+
+      <div class="course_bar">
+         <!-- <CourseMenu
           :themes="course?.themes || []"
           @select-task="setSelectedTask"
-        />
+        /> -->
+</div>
+    <div class="main-content">
+      <div class="content-wrapper">
 
+
+        <Botinokbar />
         <div class="content-box">
           <!-- Кнопка закрытия -->
           <button
@@ -38,6 +50,7 @@ import api from '@/api'
 
 import Shlyapabar from '@/components/Shlyapabar.vue'
 import CourseMenu from '@/components/CourseMenu.vue'
+import Botinokbar from '@/components/Botinokbar.vue';
 
 import TaskVideo from '@/components/tasks/TaskVideo.vue'
 import TaskConspect from '@/components/tasks/TaskConspect.vue'
@@ -108,9 +121,21 @@ onMounted(async () => {
   transition: transform 0.2s ease;
 }
 
+.course_bar {
+  display: flex;
+  justify-content: flex-start;
+  padding: 0 40px;
+  margin-top: 16px;
+  right: 0px;
+  top: 0px;
+  height: 250px;
+}
+
+
 /* 🔹 Главный контейнер */
 .app-container {
-  background-color:#08000e;
+  background-color:transparent;
+  padding-top: 50px;
   flex-grow: 1;
   display: flex;
   min-height: 100vh; /* 👈 вместо height: 100vh */

@@ -1,6 +1,6 @@
 <template>
   <div class="botinokbar">
-    <div class="buttons_kunt">
+    <div class="bot_buttons_kunt">
 
     <button class="botinokbar-button">Чат с куратором</button>
 
@@ -46,7 +46,7 @@ const courseTitle = ref('')
 
   }
 
-  .buttons_kunt{
+  .bot_buttons_kunt{
   padding-right: 130px;
   padding-bottom: 80px;
   /* margin-bottom: 60px; */
@@ -60,7 +60,7 @@ const courseTitle = ref('')
     background: transparent;
     display: flex;
     align-items: center;
-    z-index: 0;
+    z-index: -1;
     box-sizing: border-box;
     padding-bottom: 4%;
   }
