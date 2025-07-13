@@ -10,7 +10,7 @@ VIDEO_PATH = "/data/videos/"
 CONSPECT_PATH = "/data/conspects/"
 
 def run_migrations():
-    print("📦 Running migrations...")
+    print("Running migrations...")
 
     from flask import Flask
     from flask_migrate import upgrade, Migrate
@@ -28,7 +28,7 @@ def run_migrations():
         upgrade()
 
 def clear_tables():
-    print("⚠️ Удаление всех данных из таблиц...")
+    print("Deleting all data from tables...")
 
     # Удаляем сначала зависимые (Task → Theme → Course)
     Option.query.delete()
@@ -46,11 +46,11 @@ def clear_tables():
     Role.query.delete()
     BlockType.query.delete()
     db.session.commit()
-    print("✅ Все данные удалены.")
+    print("Data cleared.")
 
 def seed_roles():
     if Role.query.first():
-        print("🔍 Roles already seeded. Skipping.")
+        print("Roles already seeded. Skipping.")
         return
 
     roles = [
@@ -61,7 +61,7 @@ def seed_roles():
 
     db.session.bulk_save_objects(roles)
     db.session.commit()
-    print("✅ Roles table seeded successfully.")
+    print("Roles table seeded successfully.")
 
 def seed_courses():
 
@@ -180,7 +180,6 @@ def gpt_seed_from_json(data):
             db.session.flush()
 
             for task_title, task_data in theme_data["tasks"].items():
-                print(task_title)
                 task_type = get_or_create_task_type(task_data["type"])
                 task = Task(title=task_title, type_id=task_type.id, theme_id=theme.id)
                 db.session.add(task)
@@ -223,7 +222,7 @@ def gpt_seed_from_json(data):
                             db.session.add(Block(cat=b["cat"], type_id=block_type.id, block_task_id=block_task.id))
 
     db.session.commit()
-    print("✅ JSON import complete.")
+    print("JSON import complete.")
 
 def get_or_create_task_type(name):
     tt = TaskType.query.filter_by(type=name).first()
