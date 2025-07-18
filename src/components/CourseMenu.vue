@@ -19,6 +19,7 @@
           v-for="task in theme.tasks"
           :key="task.id"
           class="lesson-button"
+          :class="{ active: activeTaskId === task.id }"
           @click="selectTask(task)"
         >
           {{ task.title }}
@@ -41,17 +42,19 @@ defineProps({
 const emit = defineEmits(['select-task'])
 
 const openedTopics = ref([])
+const activeTaskId = ref(null) // Храним ID активной задачи
 
 const toggleTopic = (index) => {
   const idx = openedTopics.value.indexOf(index)
   if (idx === -1) {
-    openedTopics.value = [index] // 👈 открываем только одну тему
+    openedTopics.value = [index]
   } else {
     openedTopics.value = []
   }
 }
 
 const selectTask = (task) => {
+  activeTaskId.value = task.id // Устанавливаем активную задачу
   emit('select-task', task)
 }
 </script>
@@ -60,9 +63,9 @@ const selectTask = (task) => {
 
 .course-menu {
   display: flex;
-  gap: 15px;
+  gap: 10px;
   padding: 0 60px;
-  margin-top: 30px;
+  margin-top: 1px;
 }
 
 .tab-wrapper {
@@ -80,7 +83,7 @@ const selectTask = (task) => {
   font-size: 18px;
   padding-bottom: 24px;
   position: relative;
-  width: 250px;
+  width: 350px;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -96,7 +99,7 @@ const selectTask = (task) => {
   position: absolute;
   bottom: 12px;
   left: 0;
-  width: 250px;
+  width: 350px;
   height: 2px;
   background-color: #CDBDF5;
 }
@@ -127,14 +130,29 @@ const selectTask = (task) => {
 /* Выпадающий список заданий */
 .lessons-list {
   position: absolute;
-  top: calc(100% + 16px);
-  background-color: var(--lesson_button);
-  padding: 10px;
-  border-radius: 8px;
+  top: calc(100% + 12px);
+  background-color: transparent;
+  padding: 6px;
   display: flex;
+  overflow-y: auto;
   flex-direction: column;
   z-index: 100;
-  min-width: 260px;
+  width: 340px;
+  left: 0px;
+  height: 60px;
+}
+
+.lessons-list::-webkit-scrollbar {
+  height: 8px;
+  width: 6px;
+}
+.lessons-list::-webkit-scrollbar-thumb {
+  background: transparent;
+  border: 1PX SOLID #d6cbf3af;
+  border-radius: 6px;
+}
+.lessons-list::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .lesson-button {
@@ -142,13 +160,26 @@ const selectTask = (task) => {
   border: none;
   color: white;
   text-align: left;
-  padding: 8px;
+  padding: 6px 24px 6px 12px; /* Добавим правый отступ для точки */
   border-radius: 4px;
   cursor: pointer;
+  position: relative; /* Для позиционирования псевдоэлемента */
+}
+
+.lesson-button.active::after {
+  content: "";
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  background-color: white;
+  border-radius: 50%;
 }
 
 .lesson-button:hover {
-  background: var(--lesson_button_hover);
+  background: #501FD2;
 }
 
 </style>

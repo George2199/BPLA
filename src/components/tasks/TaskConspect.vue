@@ -83,12 +83,13 @@ onMounted(async () => {
 /* Используем глобальные стили для правильного отображения Markdown */
 .markdown-container {
   padding: 20px;
-  background: #fff;
-  border-radius: 8px;
+  background: transparent;
+  border: 2px solid #CDBDF5;
+  border-radius: 30px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   max-width: 100%;
   overflow-x: auto;
-  max-height: 570px; /* Увеличиваем высоту */
+  max-height: 620px; /* Увеличиваем высоту */
   overflow-y: auto; /* Добавляем вертикальный скроллинг */
 }
 

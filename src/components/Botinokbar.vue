@@ -27,7 +27,7 @@ const courseTitle = ref('')
 
  .botinokbar-button {
   cursor: pointer;
-  margin-top: 25px;
+  margin-top: 11px;
   width: 200px;
   padding: 10px;
   margin: 5px;

@@ -56,7 +56,7 @@ watchEffect(() => {
 
   .shlyapa-button {
   cursor: pointer;
-  margin-top: 25px;
+  /* margin-top: 15px; */
   width: 200px;
   padding: 10px;
   margin: 5px;
@@ -77,14 +77,14 @@ watchEffect(() => {
 
   .buttons_kunt{
   padding-left: 75px;
-  padding-top: 60px;
+  padding-top: 50px;
    padding-bottom: 10px;
   /* margin-bottom: 60px; */
 
   }
   .shlyapabar {
     position: fixed;
-    top: 20px;
+    top: 0px;
     left: 0;
     width: 100%;
     height: 80px;

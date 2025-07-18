@@ -152,6 +152,7 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   padding: 20px;
+  padding-top: 60px;  
   overflow: hidden;
 }
 
@@ -159,20 +160,20 @@ onMounted(async () => {
 .content-wrapper {
   display: flex;
   gap: 20px;
-  width: 100%;
+  width: 83%;
   align-items: flex-start; /* важный момент! */
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .content-box {
   position: relative;
-  background: var(--border_color);
   border-radius: 8px;
   min-width: 300px;
   width: 100%;
   max-width: 100%;
   display: block;
   overflow: hidden; /* 👈 блокируем всё лишнее */
-  margin: 0 auto;
   max-height: calc(100vh - 120px); /* 👈 (примерно: 60px шляпа + 60px отступы) */
   box-sizing: border-box;
 }

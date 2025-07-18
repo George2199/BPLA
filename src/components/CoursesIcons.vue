@@ -117,7 +117,7 @@ onMounted(async () => {
 }
 
 .container::-webkit-scrollbar {
-  height: 10px;
+  height: 8px;
   width: 8px;
 }
 .container::-webkit-scrollbar-thumb {
@@ -198,7 +198,7 @@ onMounted(async () => {
   gap: 50px; /* Расстояние между блоками */
   max-width: 1600px; /* Ограничение ширины, чтобы влезало 3 блока */
   margin-left:  50px; 
-   height: 70vh; 
+   height: 65vh; 
 }
 
 .card {
@@ -212,12 +212,7 @@ onMounted(async () => {
     color: inherit;
 }
 
-/* .card:hover {
-    box-shadow:
-    0 0 10px 2px var(--card_hover_bottom),
-    0 0 20px 4px var(--card_hover_middle),
-    inset 0 0 10px var(--card_hover_top);
-} */
+
 
 .card-image {
     width: 100%;
