@@ -1,7 +1,7 @@
 <template>
-  <div class="test-card">
+  <div class="kunt">
     <h2>{{ task?.title || 'Тест' }}</h2>
-    <div class="kunt">
+    <div class="questions-grid">
       <ManySelect
         v-for="(q, i) in questions"
         :key="i"
@@ -10,17 +10,17 @@
         :model-value="answers[i]"
         @update:model-value="val => answers[i] = val"
       />
-      <div class="under_kunt_for_button">
-        <button class="submit-btn" :disabled="!canSubmit" @click="submitTest">Сдать</button>
-      </div>
     </div>
+    <div class="under_kunt_for_button">
+      <button class="submit-btn" :disabled="!canSubmit" @click="submitTest">Сдать</button>
+    </div>
+  </div>
 
-    <div v-if="result">
-      <p class="result_p">Результат: {{ result.score }} из {{ result.total }}</p>
-      <p class="result_p">Прогресс: {{ (result.progress * 100).toFixed(0) }}%</p>
-      <div class="progress-bar">
-        <div class="progress-fill" :style="{ width: (result.progress * 100) + '%' }"></div>
-      </div>
+  <div v-if="result">
+    <p class="result_p">Результат: {{ result.score }} из {{ result.total }}</p>
+    <p class="result_p">Прогресс: {{ (result.progress * 100).toFixed(0) }}%</p>
+    <div class="progress-bar">
+      <div class="progress-fill" :style="{ width: (result.progress * 100) + '%' }"></div>
     </div>
   </div>
 </template>
@@ -147,14 +147,34 @@ async function refreshCourses() {
 }
 
 .kunt {
+  display: flex;
+  flex-direction: column;
   flex: 1;
-  background: var(--background_color);
+  background: transparent;
+  border: solid 2px white;
+  border-radius: 35px;
   overflow-y: auto;
   padding-right: 10px;
   scrollbar-gutter: stable;
   position: relative;
+  height: 650px; /* Добавлено */
+  max-height: 80vh; /* Добавлено */
+  overflow-y: scroll; /* Изменено с auto на scroll для гарантии */
 }
 
+.questions-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 колонки */
+  gap: 20px; /* Расстояние между вопросами */
+  padding: 0 30px; /* Отступы по бокам как у h2 */
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .questions-grid {
+    grid-template-columns: 1fr; /* На мобильных - одна колонка */
+  }
+}
 
 .kunt::-webkit-scrollbar {
   overflow-y: visible;
@@ -178,8 +198,8 @@ async function refreshCourses() {
 .test-card {
   position: relative;
   background: transparent;
-  color: var(--background_color);
-  padding-top: 24px;
+  color: white;
+  padding-top: px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -187,10 +207,11 @@ async function refreshCourses() {
 
 h2 {
   font-weight: 800;
-  font-size: 20px;
+  font-size: 40px;
   margin-bottom: 15px;
-  margin-top: 0px;
-  text-align: center;
+  margin-top: 15px;
+  text-align: left;
+  padding: 30px;
 }
 
 .text-input {

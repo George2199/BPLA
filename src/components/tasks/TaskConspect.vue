@@ -109,28 +109,28 @@ onMounted(async () => {
 
 .md-content {
   line-height: 1.6;
-  color: #333;
+  color: #ffffff;
 }
 
 .md-content h1 {
   font-size: 2em;
   margin-top: 0.5em;
   margin-bottom: 0.5em;
-  color: #2c3e50;
+  color: #ffffff;
 }
 
 .md-content h2 {
   font-size: 1.5em;
   margin-top: 0.7em;
   margin-bottom: 0.5em;
-  color: #2c3e50;
+  color: #ffffff;
 }
 
 .md-content h3 {
   font-size: 1.2em;
   margin-top: 0.8em;
   margin-bottom: 0.5em;
-  color: #2c3e50;
+  color: #ffffff;
 }
 
 .md-content p {
@@ -201,19 +201,18 @@ onMounted(async () => {
 .markdown-container::-webkit-scrollbar {
   width: 8px;
   height: 8px;
+
 }
 
 .markdown-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: transparent;
   border-radius: 4px;
 }
 
 .markdown-container::-webkit-scrollbar-thumb {
-  background: #888;
+  background: transparent;
   border-radius: 4px;
+    border: solid 1px white;
 }
 
-.markdown-container::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
 </style>

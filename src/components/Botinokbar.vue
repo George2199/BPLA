@@ -48,7 +48,7 @@ const courseTitle = ref('')
 
   .bot_buttons_kunt{
   padding-right: 130px;
-  padding-bottom: 80px;
+  padding-bottom: 30px;
   /* margin-bottom: 60px; */
 
   }
