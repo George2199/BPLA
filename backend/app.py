@@ -35,10 +35,14 @@ if not os.path.exists(db_path):
     print("[INFO] Database not found. Initializing...")
     with app.app_context():
         db.create_all()
+else:
+    print("[INFO] Database found. Re-initializing...")
+    with app.app_context():
+        os.remove(db_path)
+        db.create_all()
+
 
 with app.app_context():
-    os.remove(db_path)
-    db.create_all()
     try:
         import seed
         seed.run_migrations()
