@@ -191,6 +191,7 @@ onMounted(async () => {
 
 .container {
   margin-left: 300px;
+    margin-top: 50px;
   scroll-behavior: smooth;
   display: flex;
   flex-wrap: wrap;

@@ -12,7 +12,7 @@
       />
     </div>
     <div class="under_kunt_for_button">
-      <button class="submit-btn" :disabled="!canSubmit" @click="submitTest">Сдать</button>
+      <button class="submit-btn" :disabled="!canSubmit" @click="submitTest">Завершить тест</button>
     </div>
   </div>
 
@@ -144,6 +144,7 @@ async function refreshCourses() {
   height:20px;
   color: transparent;
   position: relative;
+  bottom: 1px;
 }
 
 .kunt {
@@ -151,7 +152,7 @@ async function refreshCourses() {
   flex-direction: column;
   flex: 1;
   background: transparent;
-  border: solid 2px white;
+  border: 2px solid #CDBDF5;
   border-radius: 35px;
   overflow-y: auto;
   padding-right: 10px;

@@ -30,7 +30,7 @@ import CoursesIcons from '@/components/CoursesIcons.vue';
   flex-direction: column;
   overflow-y:auto;
   width: 100%;
-  padding-top: 100px; 
+  /* padding-top: 100px;  */
   padding-left: 100px;
 }
 
@@ -46,7 +46,7 @@ import CoursesIcons from '@/components/CoursesIcons.vue';
   align-items: center;
   font-family: 'Inter', sans-serif;
   position: relative;
-  overflow: hidden;
+  overflow:auto;
 }
 
 </style>

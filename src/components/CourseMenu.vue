@@ -139,7 +139,7 @@ const selectTask = (task) => {
   z-index: 100;
   width: 340px;
   left: 0px;
-  height: 60px;
+  height: 80px;
 }
 
 .lessons-list::-webkit-scrollbar {

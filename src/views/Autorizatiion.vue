@@ -214,7 +214,8 @@ input {
   border-color: #0000005b;
   place-content: "Логин";
   font-size: 17px;
-  /* margin-top: 2px; */
+  /* margin-top: 2px; */  
+  user-select: text;
 }
 
 button {

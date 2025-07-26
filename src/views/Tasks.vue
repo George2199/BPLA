@@ -1,26 +1,20 @@
 <template>
   <div class="app-container">
-      <Shlyapabar>
-        <template #course-menu>
-          <CourseMenu
-            :themes="course?.themes || []"
-            @select-task="setSelectedTask"
-          />
-        </template>
-      </Shlyapabar>
-
-
-      <div class="course_bar">
-         <!-- <CourseMenu
+    <Shlyapabar>
+      <template #course-menu>
+        <CourseMenu
           :themes="course?.themes || []"
           @select-task="setSelectedTask"
-        /> -->
-</div>
+        />
+      </template>
+    </Shlyapabar>
+
+    <div class="course_bar">
+      <!-- Ваш курс меню -->
+    </div>
+    
     <div class="main-content">
       <div class="content-wrapper">
-
-
-        <Botinokbar />
         <div class="content-box">
           <!-- Кнопка закрытия -->
           <button
@@ -38,6 +32,11 @@
             :task="selectedTask"
           />
         </div>
+      </div>
+      
+      <!-- Botinokbar теперь внутри main-content, но после content-wrapper -->
+      <div class="botinokbar-container">
+        <Botinokbar />
       </div>
     </div>
   </div>
@@ -96,6 +95,35 @@ onMounted(async () => {
 
 
 <style scoped>
+.botinokbar-container {
+  width: 100%;
+  padding: 20px 0;
+  margin-top: auto; /* Это прижмет контейнер к низу */
+}
+
+/* Обновляем стили для main-content */
+.main-content {
+  flex-grow: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  padding-top: 0; /* 👈 Убираем лишний отступ, так как шляпа уже в потоке */
+  overflow: visible;
+}
+
+
+.content-wrapper {
+  flex-grow: 1; /* Занимает все доступное пространство */
+  display: flex;
+  gap: 20px;
+  width: 83%;
+  align-items: flex-start;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
 .h2 {
   margin-top: 0;
 }
@@ -125,35 +153,23 @@ onMounted(async () => {
   display: flex;
   justify-content: flex-start;
   padding: 0 40px;
-  margin-top: 16px;
+  /* margin-top: 16px; */
   right: 0px;
   top: 0px;
-  height: 250px;
+  height: 100px;
 }
 
 
 /* 🔹 Главный контейнер */
 .app-container {
   background-color:transparent;
-  padding-top: 50px;
+  /* padding-top: 50px; */
   flex-grow: 1;
   display: flex;
-  min-height: 100vh; /* 👈 вместо height: 100vh */
-  /* background: linear-gradient(to bottom right, var(--grad_color_left), var(--grad_color_right)); */
+  flex-direction: column; /* 👈 теперь контент идёт сверху вниз */
+  flex-grow: 1;
+  min-height: 100vh;
   color: white;
-}
-
-
-/* 🔹 Основной контент */
-.main-content {
-  flex-grow: 1;
-  min-width: 0;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
-  padding-top: 60px;  
-  overflow: hidden;
 }
 
 

@@ -75,7 +75,8 @@ html, body {
   padding: 0;
   height: 100%;
   overscroll-behavior: none;
-  overflow: hidden;
+  overflow:auto;
+  user-select: none;
 }
 
 #app,
@@ -91,16 +92,16 @@ html, body {
   flex-direction: column;
   flex-grow: 1;
   height: 100%;
-  overflow: hidden;
+ overflow:auto;
 }
 
-.main-and-console.with-header .main-scroll-zone{
-  padding-top: 60px; /* добавляем отступ, если есть шляпа */
-}
+/* .main-and-console.with-header .main-scroll-zone{
+  padding-top: 60px; добавляем отступ, если есть шляпа
+} */
 
 .main-scroll-zone {
   flex-grow: 1;
-  overflow: hidden;
+  overflow: auto;
   min-height: 0;
 }
 

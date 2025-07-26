@@ -35,6 +35,36 @@ function prepareMarkdown(md) {
     .replace(/<img\s+src="\/data\/(.*?)"/g, `<img src="${API_BASE_URL}/data/$1"`)
 }
 
+function setupCopyButtons() {
+  setTimeout(() => {
+    const codeBlocks = document.querySelectorAll('.md-content pre')
+    codeBlocks.forEach(block => {
+      // Создаем кнопку копирования
+      const copyBtn = document.createElement('button')
+      copyBtn.className = 'copy-code-btn'
+      copyBtn.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+          <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+        </svg>
+      `
+      
+      // Добавляем обработчик клика
+      copyBtn.addEventListener('click', () => {
+        const code = block.querySelector('code')?.textContent || ''
+        navigator.clipboard.writeText(code).then(() => {
+          copyBtn.classList.add('copied')
+          setTimeout(() => copyBtn.classList.remove('copied'), 2000)
+        })
+      })
+      
+      // Добавляем кнопку в блок кода
+      block.style.position = 'relative'
+      block.appendChild(copyBtn)
+    })
+  }, 500)
+}
+
 function setupDownloadLinks() {
   setTimeout(() => {
     const links = document.querySelectorAll('.md-content a[download]')
@@ -70,6 +100,7 @@ onMounted(async () => {
     const markdown = prepareMarkdown(String(raw || ''))
     renderedContent.value = marked.parse(markdown)
     setupDownloadLinks()
+    setupCopyButtons()
   } catch (e) {
     error.value = `Ошибка загрузки: ${e.message}`
   } finally {
@@ -80,9 +111,71 @@ onMounted(async () => {
 </script>
 
 <style>
+
+.copy-code-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  padding: 4px 6px;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s ease;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.copy-code-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.md-content pre:hover .copy-code-btn {
+  opacity: 1;
+}
+
+.copy-code-btn.copied {
+  background: rgba(255, 255, 255, 0.2);
+  opacity: 1;
+}
+
+.copy-code-btn.copied::after {
+  content: 'Скопировано!';
+  position: absolute;
+  right: 40px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.copy-tooltip {
+  position: absolute;
+  right: 100%;
+  white-space: nowrap;
+  background: #4CAF50;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  opacity: 0;
+  transform: translateX(10px);
+  transition: all 0.2s ease;
+  pointer-events: none;
+}
+
+.copy-code-btn.copied .copy-tooltip {
+  opacity: 1;
+  transform: translateX(0);
+}
+
 /* Используем глобальные стили для правильного отображения Markdown */
 .markdown-container {
-  padding: 20px;
   background: transparent;
   border: 2px solid #CDBDF5;
   border-radius: 30px;
@@ -91,6 +184,9 @@ onMounted(async () => {
   overflow-x: auto;
   max-height: 620px; /* Увеличиваем высоту */
   overflow-y: auto; /* Добавляем вертикальный скроллинг */
+  padding: 20px; /* общий отступ */
+  padding-right: 8px; /* дополнительный отступ справа для скроллбара */
+  scrollbar-gutter: stable; /* резервируем место под скроллбар */
 }
 
 .loading {
@@ -142,15 +238,16 @@ onMounted(async () => {
   padding: 2px 4px;
   border-radius: 3px;
   font-family: monospace;
-  color: #e74c3c;
+  color: #0c0816;
 }
 
 .md-content pre {
-  background: #f1f1f1;
+  background: #231641 ;
   padding: 10px;
   overflow: auto;
   border-radius: 4px;
   margin-bottom: 1em;
+    user-select: text;
 }
 
 .md-content ul {
@@ -199,20 +296,22 @@ onMounted(async () => {
 
 /* Добавим стиль полосы прокрутки для лучшего UX */
 .markdown-container::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
   height: 8px;
 
 }
 
 .markdown-container::-webkit-scrollbar-track {
   background: transparent;
+  margin: 35px 0;/* отступы сверху и снизу */
+  margin-right: 30px;
   border-radius: 4px;
 }
 
 .markdown-container::-webkit-scrollbar-thumb {
-  background: transparent;
+  background: #d6cbf381;
   border-radius: 4px;
-    border: solid 1px white;
+  background-clip: content-box; /* ограничивает фон только области "бегунка" */
 }
 
 </style>

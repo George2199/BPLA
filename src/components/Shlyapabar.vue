@@ -79,13 +79,13 @@ watchEffect(() => {
   padding-left: 75px;
   padding-top: 50px;
    padding-bottom: 10px;
-  /* margin-bottom: 60px; */
+  display: flex;
+  flex-direction: row;
+
 
   }
   .shlyapabar {
-    position: fixed;
-    top: 0px;
-    left: 0;
+    position: relative;
     width: 100%;
     height: 80px;
     background: transparent;
