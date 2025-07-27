@@ -12,6 +12,11 @@ install.ps1
 start_app.bat
 start_backend.bat
 *.exe
+release/
+wheelhouse/
+build/python-linux/
+build/python-win/
+.venv/
 
 # 👉 Python
 __pycache__/
@@ -24,6 +29,7 @@ venv/
 env/
 .venv/
 .Python
+python/
 
 # 👉 Flask / PyInstaller
 backend/dist/               # PyInstaller build (исходники backend_server.exe)
