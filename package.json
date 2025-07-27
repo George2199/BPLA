@@ -4,6 +4,11 @@
   "private": true,
   "type": "module",
   "main": "electron/main.cjs",
+  "description": "AeroCosmos desktop app",
+  "author": {
+    "name": "George Denisov",
+    "email": "2georgedenisov@gmail.com"
+  },
   "scripts": {
     "dev:win": "concurrently \"cd backend && cross-env FLASK_APP=app.py flask run\" \"vite\"",
     "dev:unix": "concurrently \"cd backend && ./venv/bin/python3 -m flask run\" \"vite\"",
@@ -12,8 +17,10 @@
     "electron:all": "concurrently \"cd backend && ./venv/bin/python3 -m flask run\" \"vite\" \"npm run electron:start\"",
     "build": "npm run clean && vite build && electron-builder",
     "build:win": "npm run clean && vite build && electron-builder --win --config.extraMetadata.debug=true --config.forceCodeSigning=false",
+    "build:linux": "npm run clean && vite build && electron-builder --linux",
+    "build:all": "npm run clean && vite build && electron-builder --win --linux",
     "preview": "vite preview",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist release"
   },
   "dependencies": {
     "axios": "^1.8.4",
@@ -38,32 +45,37 @@
     "appId": "com.aerocosmos.app",
     "productName": "AeroCosmos",
     "directories": {
-      "output": "dist"
+      "output": "release"
     },
     "files": [
       "dist/**",
       "electron/**",
-      "backend/**",
       "install.ps1",
       "!backend/venv/lib/**",
       "!**/*.exe"
     ],
     "extraResources": [
       {
-        "from": "build/python-linux",
-        "to": "python"
-      },
-      {
         "from": "wheelhouse",
         "to": "wheelhouse"
       },
       {
         "from": "backend",
-        "to": "pyapp"
+        "to": "pyapp",
+          "filter": [
+          "**/*",
+          "!venv/**",
+          "!.venv/**",
+          "!**/__pycache__/**",
+          "!**/*.pyc"
+        ]
       }
     ],
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "extraResources": [
+        { "from": "build/python-win", "to": "python" }
+      ]
     },
     "asar": false,
     "nsis": {
@@ -71,6 +83,14 @@
       "oneClick": false,
       "allowElevation": true,
       "allowToChangeInstallationDirectory": true
+    },
+    "linux": {
+      "target": ["deb"],
+      "category": "Utility",
+      "executableName": "aerocosmos",
+      "extraResources": [
+        { "from": "build/python-linux", "to": "python" }
+      ]
     },
     "publish": [
       {

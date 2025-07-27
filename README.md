@@ -36,7 +36,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Compile and Hot-Reload for Development
+## Compile and Hot-Reload for Development
 
 Windows:
 ```sh
@@ -48,8 +48,44 @@ Unix:
 npm run dev
 ```
 
-### Run app demo
+## Run app demo
 
 ```sh
 npm run electron:start
+```
+
+## Build
+after Project setup!
+
+### Linux
+
+prepare wheelhouse:
+```sh
+python3 -m pip install -U pip wheel
+
+python3 -m pip wheel -r backend/requirements.txt -w wheelhouse
+```
+
+prepare standalone python:
+
+#### For Linux:
+```sh
+source ./scripts/pbs.lock
+
+curl -L -o pbs.tar.gz "https://github.com/astral-sh/python-build-standalone/releases/download/${PBS_RELEASE}/cpython-${PYTHON}+${PBS_RELEASE}-${LINUX_TARGET}-install_only.tar.gz"
+
+tar --use-compress-program=unzstd -xf pbs.tar.gz
+
+mkdir -p build/python-linux && rsync -a python/ build/python-linux/
+```
+
+#### For Windows:
+```sh
+source ./scripts/pbs.lock
+
+curl -L -o pbs.tar.gz "https://github.com/astral-sh/python-build-standalone/releases/download/${PBS_RELEASE}/cpython-${PYTHON}+${PBS_RELEASE}-${WIN_TARGET}-install_only.tar.gz"
+
+tar --use-compress-program=unzstd -xf pbs.tar.gz
+
+mkdir -p build/python-win && rsync -a python/ build/python-win/
 ```

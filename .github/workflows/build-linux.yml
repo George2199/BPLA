@@ -1,0 +1,93 @@
+name: Build Linux Installer
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install OS tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rsync
+
+      # Подхватываем версии PBS из scripts/pbs.lock
+      - name: Load PBS lock
+        shell: bash
+        run: |
+          set -e
+          source ./scripts/pbs.lock
+          echo "PYTHON=$PYTHON" >> $GITHUB_ENV
+          echo "PBS_RELEASE=$PBS_RELEASE" >> $GITHUB_ENV
+          echo "LINUX_TARGET=$LINUX_TARGET" >> $GITHUB_ENV
+
+      # Кэш wheelhouse по хэшу requirements.txt
+      - name: Cache wheelhouse
+        id: cache-wheel
+        uses: actions/cache@v4
+        with:
+          path: wheelhouse
+          key: wheelhouse-linux-py${{ env.PYTHON }}-${{ hashFiles('backend/requirements.txt') }}
+
+      - name: Build wheelhouse (if cache miss)
+        if: steps.cache-wheel.outputs.cache-hit != 'true'
+        run: |
+          python -m pip install -U pip wheel
+          python -m pip wheel -r backend/requirements.txt -w wheelhouse
+
+      # Кэш PBS (готовая папка build/python-linux)
+      - name: Cache PBS (linux)
+        id: cache-pbs
+        uses: actions/cache@v4
+        with:
+          path: build/python-linux
+          key: pbs-linux-${{ env.PYTHON }}-${{ env.PBS_RELEASE }}-${{ env.LINUX_TARGET }}
+
+      - name: Download & unpack PBS (if cache miss)
+        if: steps.cache-pbs.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          set -e
+          URL="https://github.com/astral-sh/python-build-standalone/releases/download/${PBS_RELEASE}/cpython-${PYTHON}+${PBS_RELEASE}-${LINUX_TARGET}-install_only.tar.gz"
+          curl -L -o pbs.tar.gz "$URL"
+          tar -xzf pbs.tar.gz
+
+          # Найти распакованный каталог "python" вне зависимости от структуры архива
+          SRC="$(find . -maxdepth 2 -type d -name python | head -n1)"
+          if [ -z "$SRC" ]; then
+            echo "python directory not found in archive"; exit 1
+          fi
+
+          rm -rf build/python-linux
+          mkdir -p build/python-linux
+          rsync -a "$SRC"/ build/python-linux/
+          chmod +x build/python-linux/bin/python* || true
+
+      - name: Install Node deps
+        run: npm ci
+
+      - name: Build Linux installer
+        run: npm run build:linux
+
+      - name: Upload artifact (.deb)
+        uses: actions/upload-artifact@v4
+        with:
+          name: aero-linux
+          path: release/*.deb

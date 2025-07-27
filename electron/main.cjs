@@ -2,6 +2,7 @@ const { app, BrowserWindow } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
+const { ensureVenv } = require('./python-bootstrap.cjs')
 
 let backendProcess = null;
 const isDev = !app.isPackaged;
@@ -21,40 +22,41 @@ console.error = (...args) => {
 };
 
 function launchBackend() {
-  let python, backendScript, cwd;
-
-  if (isDev) {
-    python = path.resolve(__dirname, '..', 'backend', 'venv', 'bin', 'python3');
-    backendScript = path.resolve(__dirname, '..', 'backend', 'app.py');
-    cwd = path.dirname(backendScript);
-    console.log('Launching backend in DEV mode...');
-  } else {
-    const basePath = process.resourcesPath;
-    backendScript = path.join(basePath, 'backend', 'app.py');
-    if (process.platform === 'win32') {
-      python = path.join(basePath, 'venv', 'Scripts', 'python.exe');
-    } else {
-      python = path.join(basePath, 'venv', 'bin', 'python3');
-    }
-    cwd = path.dirname(backendScript);
-    console.log('Launching backend in PROD mode...');
-  }
-
-  console.log('Python path:', python);
-  console.log('Backend script:', backendScript);
+  let python, backendScript, cwd
 
   try {
-    backendProcess = spawn(python, [backendScript], {
-      cwd,
-      detached: !isDev,
-      stdio: isDev ? 'inherit' : 'ignore',
-      windowsHide: true
-    });
-
-    if (!isDev) backendProcess.unref();
-    console.log('Backend launched');
+    python = ensureVenv()
   } catch (e) {
-    console.error('Failed to launch backend process:', e);
+    console.error('[bootstrap] ensureVenv error:', e)
+    throw e
+  }
+
+  if (isDev) {
+    python = path.resolve(__dirname, '..', 'backend', 'venv', 'bin', 'python3')
+    backendScript = path.resolve(__dirname, '..', 'backend', 'app.py')
+    cwd = path.dirname(backendScript)
+    console.log('Launching backend in DEV mode...')
+  } else {
+    backendScript = path.join(process.resourcesPath, 'pyapp', 'app.py')
+    cwd = path.dirname(backendScript)
+    console.log('Launching backend in PROD mode...')
+  }
+
+  console.log('Python path:', python)
+  console.log('Backend script:', backendScript)
+
+  backendProcess = spawn(python, [backendScript], {
+    cwd,
+    detached: !isDev,
+    stdio: isDev ? 'inherit' : 'pipe',
+    windowsHide: true,
+    env: { ...process.env, PYTHONNOUSERSITE: '1' }
+  })
+
+  if (!isDev) {
+    backendProcess.stdout?.on('data', d => console.log('[py]', d.toString()))
+    backendProcess.stderr?.on('data', d => console.error('[py]', d.toString()))
+    backendProcess.unref()
   }
 }
 
@@ -76,7 +78,7 @@ function createWindow() {
     });
     win.webContents.openDevTools();
   } else {
-    const indexPath = path.join(process.resourcesPath, 'dist', 'index.html');
+    const indexPath = path.join(app.getAppPath(), 'dist', 'index.html')
     win.loadFile(indexPath).then(() => {
       console.log('Frontend loaded');
     }).catch(err => {

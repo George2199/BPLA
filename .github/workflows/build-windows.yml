@@ -10,24 +10,77 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 22
 
-      - name: Install dependencies
-        run: npm install
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # Подхватываем версии PBS из scripts/pbs.lock
+      - name: Load PBS lock
+        shell: bash
+        run: |
+          source ./scripts/pbs.lock
+          echo "PYTHON=$PYTHON" >> $GITHUB_ENV
+          echo "PBS_RELEASE=$PBS_RELEASE" >> $GITHUB_ENV
+          echo "WIN_TARGET=$WIN_TARGET" >> $GITHUB_ENV
+
+      # Кэш wheelhouse
+      - name: Cache wheelhouse
+        id: cache-wheel
+        uses: actions/cache@v4
+        with:
+          path: wheelhouse
+          key: wheelhouse-windows-py${{ env.PYTHON }}-${{ hashFiles('backend/requirements.txt') }}
+
+      - name: Build wheelhouse (if cache miss)
+        if: steps.cache-wheel.outputs.cache-hit != 'true'
+        shell: powershell
+        run: |
+          py -3.12 -m pip install -U pip wheel
+          py -3.12 -m pip wheel -r backend/requirements.txt -w wheelhouse
+
+      # Кэш PBS (готовая папка build/python-win)
+      - name: Cache PBS (win)
+        id: cache-pbs
+        uses: actions/cache@v4
+        with:
+          path: build\python-win
+          key: pbs-win-${{ env.PYTHON }}-${{ env.PBS_RELEASE }}-${{ env.WIN_TARGET }}
+
+      - name: Download & unpack PBS (if cache miss)
+        if: steps.cache-pbs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $URL = "https://github.com/astral-sh/python-build-standalone/releases/download/$env:PBS_RELEASE/cpython-$env:PYTHON+$env:PBS_RELEASE-$env:WIN_TARGET-install_only.tar.gz"
+          Invoke-WebRequest $URL -OutFile "pbs.tar.gz"
+          tar -xzf pbs.tar.gz
+          # Найдём каталог python независимо от глубины
+          $src = Get-ChildItem -Directory -Recurse -Filter python | Select-Object -First 1
+          if (-not $src) { throw "python directory not found in archive" }
+          Remove-Item -Recurse -Force build\python-win -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory -Force build\python-win | Out-Null
+          robocopy $src.FullName build\python-win /E
+          if ($LASTEXITCODE -ge 8) { exit 1 }
+
+      - name: Install Node deps
+        run: npm ci
 
       - name: Build Windows installer
         run: npm run build:win
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
-      - name: Upload artifact
+      - name: Upload artifact (.exe)
         uses: actions/upload-artifact@v4
         with:
-          name: aero-installer
-          path: dist/*.exe
+          name: aero-windows
+          path: release/*.exe

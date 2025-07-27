@@ -1,0 +1,4 @@
+PYTHON=3.12.11
+PBS_RELEASE=20250723
+LINUX_TARGET=x86_64-unknown-linux-gnu
+WIN_TARGET=x86_64-pc-windows-msvc
