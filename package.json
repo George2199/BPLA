@@ -50,12 +50,16 @@
     ],
     "extraResources": [
       {
-        "from": "backend/venv",
-        "to": "backend/venv"
+        "from": "build/python-linux",
+        "to": "python"
       },
       {
-        "from": "backend/app.py",
-        "to": "backend/app.py"
+        "from": "wheelhouse",
+        "to": "wheelhouse"
+      },
+      {
+        "from": "backend",
+        "to": "pyapp"
       }
     ],
     "win": {
