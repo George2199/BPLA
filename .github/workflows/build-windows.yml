@@ -63,13 +63,20 @@ jobs:
           $URL = "https://github.com/astral-sh/python-build-standalone/releases/download/$env:PBS_RELEASE/cpython-$env:PYTHON+$env:PBS_RELEASE-$env:WIN_TARGET-install_only.tar.gz"
           Invoke-WebRequest $URL -OutFile "pbs.tar.gz"
           tar -xzf pbs.tar.gz
-          # Найдём каталог python независимо от глубины
+      
+          # найти каталог "python" независимо от глубины
           $src = Get-ChildItem -Directory -Recurse -Filter python | Select-Object -First 1
           if (-not $src) { throw "python directory not found in archive" }
+      
           Remove-Item -Recurse -Force build\python-win -ErrorAction SilentlyContinue
           New-Item -ItemType Directory -Force build\python-win | Out-Null
-          robocopy $src.FullName build\python-win /E
-          if ($LASTEXITCODE -ge 8) { exit 1 }
+      
+          # robocopy: 0–7 = success, >=8 = error
+          robocopy "$($src.FullName)" "build\python-win" /E
+          $rc = $LASTEXITCODE
+          if ($rc -ge 8) { throw "Robocopy failed with exit code $rc" }
+          Write-Host "Robocopy OK, exit code $rc"
+          $global:LASTEXITCODE = 0
 
       - name: Install Node deps
         run: npm ci
