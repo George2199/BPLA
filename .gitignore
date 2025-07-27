@@ -14,9 +14,13 @@ start_backend.bat
 *.exe
 release/
 wheelhouse/
-build/python-linux/
-build/python-win/
+build/
 .venv/
+*.gz
+*.lib
+*.dll
+*.tcl
+*.gif
 
 # 👉 Python
 __pycache__/

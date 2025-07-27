@@ -1,7 +1,7 @@
+// electron/python-bootstrap.cjs
 const { app } = require('electron')
 const path = require('path')
 const fs = require('fs')
-const crypto = require('crypto')
 const { spawnSync } = require('child_process')
 
 function bundledPython() {
@@ -10,67 +10,84 @@ function bundledPython() {
     ? path.join(base, 'python.exe')
     : path.join(base, 'bin', 'python3')
 }
+
+function venvDirForPlatform() {
+  if (process.platform === 'win32') {
+    // хранить venv локально (не в Roaming)
+    return path.join(app.getPath('localAppData'), app.getName(), 'pyenv')
+  }
+  return path.join(app.getPath('userData'), 'pyenv')
+}
+
 function venvPython(venvDir) {
   return process.platform === 'win32'
     ? path.join(venvDir, 'Scripts', 'python.exe')
     : path.join(venvDir, 'bin', 'python3')
 }
-function hashFile(p) {
-  try { return crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex').slice(0,12) }
-  catch { return 'no-req' }
+
+function run(cmd, args) {
+  const r = spawnSync(cmd, args, { encoding: 'utf8', stdio: 'pipe' })
+  if (r.status !== 0) {
+    console.error('[run:err]', cmd, args.join(' '))
+    if (r.stdout) console.error('stdout:\n', r.stdout)
+    if (r.stderr) console.error('stderr:\n', r.stderr)
+  } else {
+    console.log('[run:ok]', cmd, args.join(' '))
+  }
+  return r
 }
 
 function ensureVenv() {
-  const venvDir = path.join(app.getPath('userData'), 'pyenv')
+  const venvDir = venvDirForPlatform()
   const vpy = venvPython(venvDir)
-  const req = path.join(process.resourcesPath, 'pyapp', 'requirements.txt')
-  const reqHash = hashFile(req)
-  const stamp = path.join(venvDir, `.installed-${reqHash}`)
 
-  const needInstall =
-    !fs.existsSync(vpy) || !fs.existsSync(stamp)
+  // venv валиден — выходим
+  if (fs.existsSync(vpy)) return vpy
 
-  if (!needInstall) return vpy
+  // если каталог существует, но интерпретатора нет — чистим
+  if (fs.existsSync(venvDir) && !fs.existsSync(vpy)) {
+    try { fs.rmSync(venvDir, { recursive: true, force: true }) } catch {}
+  }
 
-  // (пере)создаём venv
   const py = bundledPython()
-  if (!fs.existsSync(vpy)) {
-    console.log('[bootstrap] creating venv:', venvDir)
-    let r = spawnSync(py, ['-m', 'venv', venvDir], { stdio: 'inherit' })
+  console.log('[bootstrap] creating venv:', venvDir)
+
+  // На Windows используем --copies, чтобы не упереться в права на симлинки
+  const createArgs = ['-m', 'venv']
+  if (process.platform === 'win32') createArgs.push('--copies')
+  createArgs.push(venvDir)
+
+  let r = run(py, createArgs)
+  if (r.status !== 0) {
+    // Фолбэк: создаём без pip (на случай проблем в момент инициализации pip)
+    const alt = ['-m', 'venv', '--without-pip']
+    if (process.platform === 'win32') alt.push('--copies')
+    alt.push(venvDir)
+    r = run(py, alt)
     if (r.status !== 0) throw new Error('venv create failed')
   }
 
-  console.log('[bootstrap] ensurepip')
-  spawnSync(vpy, ['-m', 'ensurepip', '--upgrade'], { stdio: 'inherit' })
+  // попробовать ensurepip (если есть)
+  run(vpy, ['-m', 'ensurepip', '--upgrade'])
 
-  // офлайн → при неудаче онлайн
   const wheelhouse = path.join(process.resourcesPath, 'wheelhouse')
-  const baseArgs = ['-m','pip','install','--upgrade']
-  const offlineArgs = baseArgs.slice()
-  if (fs.existsSync(wheelhouse)) offlineArgs.push('--no-index','--find-links', wheelhouse)
-  if (fs.existsSync(req))        offlineArgs.push('-r', req)
+  const req = path.join(process.resourcesPath, 'pyapp', 'requirements.txt')
+  const baseArgs = ['-m', 'pip', 'install', '--upgrade']
 
-  console.log('[bootstrap] pip install (offline if wheelhouse exists)')
-  let r = spawnSync(vpy, offlineArgs, {
-    stdio: 'inherit',
-    env: { ...process.env, PYTHONNOUSERSITE: '1', PIP_DISABLE_PIP_VERSION_CHECK: '1' }
-  })
-  if (r.status !== 0 && fs.existsSync(req)) {
-    console.warn('[bootstrap] offline failed — trying online')
-    r = spawnSync(vpy, baseArgs.concat(['-r', req]), {
-      stdio: 'inherit',
-      env: { ...process.env, PYTHONNOUSERSITE: '1', PIP_DISABLE_PIP_VERSION_CHECK: '1' }
-    })
-    if (r.status !== 0) throw new Error('pip install failed')
-  }
+  if (fs.existsSync(req)) {
+    // офлайн → если не вышло, онлайн
+    const offline = baseArgs.slice()
+    if (fs.existsSync(wheelhouse)) offline.push('--no-index', '--find-links', wheelhouse)
+    offline.push('-r', req)
 
-  // ставим маркер и чистим старые
-  for (const f of fs.readdirSync(venvDir)) {
-    if (f.startsWith('.installed-') && f !== path.basename(stamp)) {
-      try { fs.unlinkSync(path.join(venvDir, f)) } catch {}
+    r = run(vpy, offline)
+    if (r.status !== 0) {
+      console.warn('[bootstrap] offline failed — trying online')
+      r = run(vpy, baseArgs.concat(['-r', req]))
+      if (r.status !== 0) throw new Error('pip install failed')
     }
   }
-  fs.writeFileSync(stamp, new Date().toISOString())
+
   return vpy
 }
 
