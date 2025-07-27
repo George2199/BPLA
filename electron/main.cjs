@@ -4,8 +4,9 @@ const fs = require('fs');
 const { spawn } = require('child_process');
 
 let backendProcess = null;
+const isDev = !app.isPackaged;
 
-const logDir = path.join(process.resourcesPath || __dirname, 'logs');
+const logDir = path.join(app.getPath('userData'), 'logs');
 fs.mkdirSync(logDir, { recursive: true });
 const logFile = path.join(logDir, 'electron.log');
 const logStream = fs.createWriteStream(logFile, { flags: 'a' });
@@ -19,32 +20,41 @@ console.error = (...args) => {
   logStream.write(line);
 };
 
-function launchBackend(isDev) {
+function launchBackend() {
+  let python, backendScript, cwd;
+
   if (isDev) {
-    const backendScript = path.join(__dirname, 'backend', 'app.py');
-    console.log('Launching backend in dev mode from:', backendScript);
-    backendProcess = spawn('python', [backendScript], {
-      cwd: path.dirname(backendScript),
-      stdio: 'ignore',
-      detached: true,
-    });
+    python = path.resolve(__dirname, '..', 'backend', 'venv', 'bin', 'python3');
+    backendScript = path.resolve(__dirname, '..', 'backend', 'app.py');
+    cwd = path.dirname(backendScript);
+    console.log('Launching backend in DEV mode...');
   } else {
-    const backendScript = path.join(process.resourcesPath, 'backend', 'app.py');
-    const python = path.join(process.resourcesPath, 'venv', 'Scripts', 'python.exe'); // Windows
-    console.log('Launching backend in prod mode from:', backendScript);
-    backendProcess = spawn(python, [backendScript], {
-      cwd: path.dirname(backendScript),
-      stdio: 'ignore',
-      detached: true,
-      windowsHide: true,
-    });
+    const basePath = process.resourcesPath;
+    backendScript = path.join(basePath, 'backend', 'app.py');
+    if (process.platform === 'win32') {
+      python = path.join(basePath, 'venv', 'Scripts', 'python.exe');
+    } else {
+      python = path.join(basePath, 'venv', 'bin', 'python3');
+    }
+    cwd = path.dirname(backendScript);
+    console.log('Launching backend in PROD mode...');
   }
 
-  if (backendProcess) {
-    backendProcess.unref();
-    console.log('Backend launched.');
-  } else {
-    console.error('Failed to launch backend process.');
+  console.log('Python path:', python);
+  console.log('Backend script:', backendScript);
+
+  try {
+    backendProcess = spawn(python, [backendScript], {
+      cwd,
+      detached: !isDev,
+      stdio: isDev ? 'inherit' : 'ignore',
+      windowsHide: true
+    });
+
+    if (!isDev) backendProcess.unref();
+    console.log('Backend launched');
+  } catch (e) {
+    console.error('Failed to launch backend process:', e);
   }
 }
 
@@ -58,28 +68,23 @@ function createWindow() {
     },
   });
 
-  const isDev = !app.isPackaged;
-  console.log('isDev =', isDev);
-  launchBackend(isDev);
+  launchBackend();
 
   if (isDev) {
-    const devUrl = 'http://localhost:5173';
-    console.log('Loading dev server at:', devUrl);
-    win.loadURL(devUrl).catch(err => {
-      console.error('Failed to load dev URL:', err);
+    win.loadURL('http://localhost:5173').catch(err => {
+      console.error('Dev load error:', err);
     });
     win.webContents.openDevTools();
   } else {
-    const indexPath = path.join(app.getAppPath(), 'dist', 'index.html');
+    const indexPath = path.join(process.resourcesPath, 'dist', 'index.html');
     win.loadFile(indexPath).then(() => {
-      console.log('index.html loaded successfully.');
+      console.log('Frontend loaded');
     }).catch(err => {
       console.error('Failed to load index.html:', err);
     });
   }
 
-  win.on('ready-to-show', () => console.log('Window ready to show'));
-  win.webContents.on('did-finish-load', () => console.log('Finished loading web content'));
+  win.on('ready-to-show', () => console.log('Window ready'));
   win.webContents.on('did-fail-load', (e, code, desc, url) => {
     console.error(`Load failed: ${code} - ${desc} @ ${url}`);
   });
@@ -88,7 +93,6 @@ function createWindow() {
 app.whenReady().then(() => {
   console.log('App ready');
   createWindow();
-
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
@@ -98,10 +102,10 @@ app.on('window-all-closed', () => {
   console.log('All windows closed');
   if (backendProcess && !backendProcess.killed) {
     try {
-      process.kill(-backendProcess.pid); // kill group
-      console.log('Backend process killed');
+      process.kill(-backendProcess.pid);
+      console.log('Backend killed');
     } catch (e) {
-      console.error('Failed to kill backend process:', e);
+      console.error('Error killing backend:', e);
     }
   }
   if (process.platform !== 'darwin') app.quit();

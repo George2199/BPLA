@@ -47,3 +47,9 @@ Unix:
 ```sh
 npm run dev
 ```
+
+### Run app demo
+
+```sh
+npm run electron:start
+```

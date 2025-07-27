@@ -9,7 +9,7 @@
     "dev:unix": "concurrently \"cd backend && ./venv/bin/python3 -m flask run\" \"vite\"",
     "dev": "npm run dev:unix",
     "electron:start": "wait-on http://localhost:5173 && cross-env VITE_DEV_SERVER_URL=http://localhost:5173 electron .",
-    "electron:all": "concurrently \"cross-env USE_SQLITE=1 FLASK_APP=backend/app.py flask run\" \"vite\" \"npm run electron:start\"",
+    "electron:all": "concurrently \"cd backend && ./venv/bin/python3 -m flask run\" \"vite\" \"npm run electron:start\"",
     "build": "npm run clean && vite build && electron-builder",
     "build:win": "npm run clean && vite build && electron-builder --win --config.extraMetadata.debug=true --config.forceCodeSigning=false",
     "preview": "vite preview",
@@ -45,9 +45,19 @@
       "electron/**",
       "backend/**",
       "install.ps1",
+      "!backend/venv/lib/**",
       "!**/*.exe"
     ],
-    "extraResources": [],
+    "extraResources": [
+      {
+        "from": "backend/venv",
+        "to": "backend/venv"
+      },
+      {
+        "from": "backend/app.py",
+        "to": "backend/app.py"
+      }
+    ],
     "win": {
       "target": "nsis"
     },

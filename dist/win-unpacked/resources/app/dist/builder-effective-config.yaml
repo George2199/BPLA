@@ -1,0 +1,27 @@
+directories:
+  output: dist
+  buildResources: build
+appId: com.aerocosmos.app
+productName: AeroCosmos
+files:
+  - filter:
+      - dist/**
+      - electron/**
+      - backend/**
+      - install.ps1
+      - '!**/*.exe'
+extraResources: []
+win:
+  target: nsis
+asar: false
+nsis:
+  include: installer.nsh
+  oneClick: false
+  allowElevation: true
+  allowToChangeInstallationDirectory: true
+publish:
+  - provider: github
+extraMetadata:
+  debug: true
+forceCodeSigning: false
+electronVersion: 28.3.3

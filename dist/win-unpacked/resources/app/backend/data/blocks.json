@@ -1,0 +1,74 @@
+{"block_tasks": 
+    {
+        "Python 1: print": {
+            "description": "Print 'Hello, World!'",
+            "blocks":[
+                {
+                    "cat": "def main():",
+                    "type": "container"
+                },
+                {
+                    "cat": "for i in range(5):",
+                    "type": "container"
+                },
+                {
+                    "cat": "print('Hello, World!",
+                    "type": "code"
+                },
+                {
+                    "cat": "print(i)",
+                    "type": "code"
+                },
+                {
+                    "cat": "print('Goodbye, World!')",
+                    "type": "code"
+                },
+                {
+                    "cat": "main()",
+                    "type": "code"
+                }
+            ]
+        },
+        "Python 2: operations": {
+            "description": "Make value of 'a' equal 10",
+            "blocks":[
+                {
+                    "cat": "int a = 10",
+                    "type": "code"
+                },
+                {
+                    "cat": "a = 2",
+                    "type": "code"
+                },
+                {
+                    "cat": "a = 1",
+                    "type": "code"
+                },
+                {
+                    "cat": "a = '10'",
+                    "type": "code"
+                },
+                {
+                    "cat": "a *= 2",
+                    "type": "code"
+                },
+                {
+                    "cat": "a += 3",
+                    "type": "code"
+                },
+                {
+                    "cat": "i = 5",
+                    "type": "code"
+                },
+                {
+                    "cat": "i -= 2",
+                    "type": "code"
+                },
+                {
+                    "cat": "for cicle in range(i):",
+                    "type": "container"
+                }
+            ]
+        }
+    }
+}
