@@ -1,8 +1,9 @@
 # 👉 Node/Vite
 node_modules/
-**/dist/                       # vite-выход и electron-builder output
+**/dist/
 .vite/
 *.log
+**dist/
 
 # 👉 Electron
 .cacheelectron-builder/
