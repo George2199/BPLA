@@ -29,13 +29,15 @@ function launchBackend(isDev) {
       detached: true,
     });
   } else {
-    const backendExe = path.join(process.resourcesPath, 'backend', 'backend_server.exe');
-    console.log('Launching backend in prod from:', backendExe);
-    backendProcess = spawn(backendExe, [], {
-      detached: true,
+    const backendScript = path.join(process.resourcesPath, 'backend', 'app.py');
+    const python = path.join(process.resourcesPath, 'venv', 'Scripts', 'python.exe'); // Windows
+    console.log('Launching backend in prod mode from:', backendScript);
+    backendProcess = spawn(python, [backendScript], {
+      cwd: path.dirname(backendScript),
       stdio: 'ignore',
-      windowsHide: true, // 💡 ВАЖНО: скрывает окно консоли
-    });    
+      detached: true,
+      windowsHide: true,
+    });
   }
 
   if (backendProcess) {

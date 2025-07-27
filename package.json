@@ -44,29 +44,19 @@
       "dist/**",
       "electron/**",
       "backend/**",
-      "!backend/venv/**",
-      "start_app.bat",
+      "install.ps1",
       "!**/*.exe"
     ],
-    "extraResources": [
-      {
-        "from": "backend/data",
-        "to": "backend/data"
-      },
-      {
-        "from": "backend/instance",
-        "to": "backend/instance"
-      },
-      {
-        "from": "backend/dist/backend_server.exe",
-        "to": "backend/backend_server.exe"
-      }
-    ],
+    "extraResources": [],
     "win": {
-      "target": "nsis",
-      "sign": null
+      "target": "nsis"
     },
     "asar": true,
-    "forceCodeSigning": false
+    "nsis": {
+      "include": "installer.nsh",
+      "oneClick": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true
+    }
   }
 }
