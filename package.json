@@ -57,6 +57,11 @@
       "oneClick": false,
       "allowElevation": true,
       "allowToChangeInstallationDirectory": true
-    }
+    },
+    "publish": [
+      {
+        "provider": "github"
+      }
+    ]
   }
 }
