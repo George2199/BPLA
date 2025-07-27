@@ -51,7 +51,7 @@
     "win": {
       "target": "nsis"
     },
-    "asar": true,
+    "asar": false,
     "nsis": {
       "include": "installer.nsh",
       "oneClick": false,
