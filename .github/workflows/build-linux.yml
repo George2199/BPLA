@@ -66,7 +66,7 @@ jobs:
         shell: bash
         run: |
           set -e
-          URL="https://github.com/astral-sh/python-build-standalone/releases/download/${PBS_RELEASE}/cpython-${PYTHON}+${PBS_RELEASE}-${LINUX_TARGET}-install_only.tar.zst"
+          URL="https://github.com/astral-sh/python-build-standalone/releases/download/${PBS_RELEASE}/cpython-${PYTHON}+${PBS_RELEASE}-${LINUX_TARGET}-install_only.tar.gz"
           curl -L -O -J "$URL"
           F=$(ls -1 cpython-*-${LINUX_TARGET}-install_only.tar.* | head -n1)
           if [[ "$F" == *.tar.zst ]]; then
@@ -84,11 +84,7 @@ jobs:
       - name: Install Node deps
         run: npm ci
 
-      - name: Build Linux installer
-        run: npm run build:linux
-        # Если хочешь автопаблиш на тег: добавь -- --publish onTag и передай GH_TOKEN
-
-      - name: Build & publish
+      - name: Build
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
