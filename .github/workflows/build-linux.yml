@@ -26,10 +26,11 @@ jobs:
       - name: Install OS tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y rsync
+          sudo apt-get install -y zstd unzip rsync
 
       # Подхватываем версии PBS из scripts/pbs.lock
       - name: Load PBS lock
+        id: pbs
         shell: bash
         run: |
           set -e
@@ -65,30 +66,34 @@ jobs:
         shell: bash
         run: |
           set -e
-          URL="https://github.com/astral-sh/python-build-standalone/releases/download/${PBS_RELEASE}/cpython-${PYTHON}+${PBS_RELEASE}-${LINUX_TARGET}-install_only.tar.gz"
-          curl -L -o pbs.tar.gz "$URL"
-          tar -xzf pbs.tar.gz
-
-          # Найти распакованный каталог "python" вне зависимости от структуры архива
-          SRC="$(find . -maxdepth 2 -type d -name python | head -n1)"
-          if [ -z "$SRC" ]; then
-            echo "python directory not found in archive"; exit 1
+          URL="https://github.com/astral-sh/python-build-standalone/releases/download/${PBS_RELEASE}/cpython-${PYTHON}+${PBS_RELEASE}-${LINUX_TARGET}-install_only.tar.zst"
+          curl -L -O -J "$URL"
+          F=$(ls -1 cpython-*-${LINUX_TARGET}-install_only.tar.* | head -n1)
+          if [[ "$F" == *.tar.zst ]]; then
+            tar --use-compress-program=unzstd -xf "$F"
+          elif [[ "$F" == *.tar.gz ]]; then
+            tar -xzf "$F"
+          else
+            echo "Unknown archive: $F"; exit 1
           fi
-
           rm -rf build/python-linux
           mkdir -p build/python-linux
-          rsync -a "$SRC"/ build/python-linux/
-          chmod +x build/python-linux/bin/python* || true
+          rsync -a python/ build/python-linux/
+          chmod +x build/python-linux/bin/python*
 
       - name: Install Node deps
         run: npm ci
+
+      - name: Build Linux installer
+        run: npm run build:linux
+        # Если хочешь автопаблиш на тег: добавь -- --publish onTag и передай GH_TOKEN
 
       - name: Build & publish
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           npm run clean
-          vite build
+          npx vite build
           npx electron-builder --linux AppImage deb \
 
       - name: Upload artifact (.deb)
