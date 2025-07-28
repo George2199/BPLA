@@ -81,8 +81,8 @@ jobs:
       - name: Install Node deps
         run: npm ci
 
-      - name: Build Windows installer
-        run: npm run build:win
+      - name: Build + publish
+        run: npx electron-builder --windows nsis --publish always
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
 

@@ -83,8 +83,13 @@ jobs:
       - name: Install Node deps
         run: npm ci
 
-      - name: Build Linux installer
-        run: npm run build:linux
+      - name: Build & publish
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          npm run clean
+          vite build
+          npx electron-builder --linux AppImage deb \
 
       - name: Upload artifact (.deb)
         uses: actions/upload-artifact@v4

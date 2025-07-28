@@ -25,7 +25,7 @@ function venvDirForPlatform () {
       ? path.join(os.tmpdir(), app.getName())        // C:\Users\...\AppData\Local\Temp\AeroCosmos
       : path.join(os.homedir(), '.config', app.getName())
   );
-  return path.join(base, 'pyenv');
+  return path.join(base, `pyenv-v${app.getVersion()}`);
 }
 
 function venvPython(venvDir) {

@@ -1,5 +1,7 @@
 // electron/main.cjs
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, dialog } = require('electron')
+const { autoUpdater } = require('electron-updater');
+const log = require('electron-log');
 const path = require('path')
 const os    = require('os')
 const fs = require('fs')
@@ -15,6 +17,42 @@ function safePath (name) {
   catch { return path.join(os.tmpdir(), app.getName()) }   // точно доступно
 }
 /* --------------------------------------------------------------- */
+
+function initAutoUpdater() {
+  if (isDev) return;                // обновления нужны только в production
+
+  autoUpdater.logger = log;
+  autoUpdater.autoDownload = false; // не качаем в фон без спроса
+
+  autoUpdater.on('update-available', info => {
+    dialog.showMessageBox({
+      type: 'info',
+      title: 'Найдена новая версия',
+      message: `Доступна ${info.version}. Скачать и установить?`,
+      buttons: ['Да', 'Позже']
+    }).then(({ response }) => {
+      if (response === 0) autoUpdater.downloadUpdate();
+    });
+  });
+
+  autoUpdater.on('download-progress', p =>
+    log.info(`Скачано ${p.percent.toFixed(1)} %…`)
+  );
+
+  autoUpdater.on('update-downloaded', () => {
+    dialog.showMessageBox({
+      type: 'question',
+      buttons: ['Перезапустить', 'Позже'],
+      defaultId: 0,
+      message: 'Обновление загружено. Перезапустить сейчас?'
+    }).then(({ response }) => {
+      if (response === 0) autoUpdater.quitAndInstall();
+    });
+  });
+
+  autoUpdater.checkForUpdatesAndNotify();    // ← одна строка проверяет всё
+}
+
 
 const dataDir = safePath('userData')           // ← пригодится и для БД
 const logDir  = path.join(dataDir, 'logs')
@@ -103,7 +141,8 @@ function createWindow () {
 
 app.whenReady().then(() => {
   console.log('App ready')
-  createWindow()
+  createWindow();
+  initAutoUpdater();
   app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow() })
 })
 
