@@ -1,7 +1,8 @@
 // electron/python-bootstrap.cjs
-const { app } = require('electron')
-const path = require('path')
-const fs = require('fs')
+const { app } = require('electron');
+const path = require('path');
+const os   = require('os');
+const fs = require('fs');
 const { spawnSync } = require('child_process')
 
 function bundledPython() {
@@ -11,12 +12,20 @@ function bundledPython() {
     : path.join(base, 'bin', 'python3')
 }
 
-function venvDirForPlatform() {
-  if (process.platform === 'win32') {
-    // хранить venv локально (не в Roaming)
-    return path.join(app.getPath('localAppData'), app.getName(), 'pyenv')
-  }
-  return path.join(app.getPath('userData'), 'pyenv')
+function safePath(name, fallback) {
+  try { return app.getPath(name); }
+  catch { return fallback; }            // никогда не бросаем наружу
+}
+
+function venvDirForPlatform () {
+  const base = safePath(
+    'userData',
+    // надёжные каталоги, существующие на всех Windows
+    process.platform === 'win32'
+      ? path.join(os.tmpdir(), app.getName())        // C:\Users\...\AppData\Local\Temp\AeroCosmos
+      : path.join(os.homedir(), '.config', app.getName())
+  );
+  return path.join(base, 'pyenv');
 }
 
 function venvPython(venvDir) {

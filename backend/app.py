@@ -4,45 +4,53 @@ from flask_migrate import Migrate
 from models import db, Role, Course, Theme, Task, TaskType
 from config import BaseConfig
 import json, io, contextlib, sys, os, types, unittest
+from sqlalchemy import MetaData
 
-# Определяем пути
-if getattr(sys, 'frozen', False):
+# ──────────────────────────────────────────────────────────────
+#  Пути
+# ──────────────────────────────────────────────────────────────
+if getattr(sys, 'frozen', False):              # PyInstaller / Electron
     BASE_DIR = os.path.dirname(sys.executable)
 else:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-DATA_DIR = os.path.join(BASE_DIR)
+DATA_DIR = BASE_DIR                           # при желании можно вынести
 IMGS_PATH = os.path.join(BASE_DIR, "data", "imgs")
 VIDS_PATH = os.path.join(BASE_DIR, "data", "videos")
-
 os.makedirs(DATA_DIR, exist_ok=True)
-db_path = os.path.join(DATA_DIR, 'db.sqlite3')
+db_path = os.path.join(DATA_DIR, "db.sqlite3")
 
-# Создаем Flask app
+# ──────────────────────────────────────────────────────────────
+#  Приложение
+# ──────────────────────────────────────────────────────────────
 app = Flask(__name__)
 app.config.from_object(BaseConfig)
 app.config["SQLALCHEMY_DATABASE_URI"] = BaseConfig.get_sqlite_uri()
 
-# Инициализация
 db.init_app(app)
 migrate = Migrate(app, db)
-
 
 with open("db_debug_path.log", "w", encoding="utf-8") as f:
     f.write(f"[DEBUG] DB WILL BE LOADED FROM: {db_path}\n")
 
-if not os.path.exists(db_path):
-    print("[INFO] Database not found. Initializing...")
-    with app.app_context():
-        db.create_all()
-else:
-    print("[INFO] Database found. Re-initializing...")
-    with app.app_context():
-        os.remove(db_path)
-        db.create_all()
+def reset_db():
+    """Полностью очищает существующую SQLite-БД без удаления файла."""
+    print("[INFO] Database found. Re-initializing…")
+    db.session.remove()                       # закрыть сессии
 
+    meta = MetaData()
+    meta.reflect(bind=db.engine)              # сначала reflect
+    meta.drop_all(bind=db.engine)             # потом drop
+    db.create_all()                           # заново схемы
 
 with app.app_context():
+    if not os.path.exists(db_path):
+        print("[INFO] Database not found. Initializing...")
+        db.create_all()
+    else:
+        reset_db()
+
+    # сиды / миграции
     try:
         import seed
         seed.run_migrations()
@@ -50,7 +58,7 @@ with app.app_context():
         seed.seed_roles()
         seed.seed_courses()
         print("[INFO] Initialization complete.")
-    except Exception as e:
+    except Exception:
         import traceback
         print("[ERROR] Initialization failed.")
         traceback.print_exc()
@@ -366,5 +374,8 @@ def execute_code():
 
     })
 
-if __name__ == '__main__':
-    app.run(host="127.0.0.1", port=5000, debug=True)
+if __name__ == "__main__":
+    # В продакшене лучше debug=False, а use_reloader=False, чтобы не плодить процессы.
+    app.run(host="127.0.0.1", port=5000,
+            debug=True,
+            use_reloader=False)   # ← критично

@@ -1,114 +1,119 @@
-const { app, BrowserWindow } = require('electron');
-const path = require('path');
-const fs = require('fs');
-const { spawn } = require('child_process');
+// electron/main.cjs
+const { app, BrowserWindow } = require('electron')
+const path = require('path')
+const os    = require('os')
+const fs = require('fs')
+const { spawn } = require('child_process')
 const { ensureVenv } = require('./python-bootstrap.cjs')
 
-let backendProcess = null;
-const isDev = !app.isPackaged;
+let backendProcess = null
+const isDev = !app.isPackaged
 
-const logDir = path.join(app.getPath('userData'), 'logs');
-fs.mkdirSync(logDir, { recursive: true });
-const logFile = path.join(logDir, 'electron.log');
-const logStream = fs.createWriteStream(logFile, { flags: 'a' });
+/* ---------- безопасный app.getPath ------------------------------ */
+function safePath (name) {
+  try { return app.getPath(name) }
+  catch { return path.join(os.tmpdir(), app.getName()) }   // точно доступно
+}
+/* --------------------------------------------------------------- */
 
-console.log = (...args) => {
-  const line = `[LOG ${new Date().toISOString()}] ` + args.map(String).join(' ') + '\n';
-  logStream.write(line);
-};
-console.error = (...args) => {
-  const line = `[ERROR ${new Date().toISOString()}] ` + args.map(String).join(' ') + '\n';
-  logStream.write(line);
-};
+const dataDir = safePath('userData')           // ← пригодится и для БД
+const logDir  = path.join(dataDir, 'logs')
+fs.mkdirSync(logDir, { recursive: true })
+const logFile   = path.join(logDir, 'electron.log')
+const logStream = fs.createWriteStream(logFile, { flags: 'a' })
+console.log  = (...a) => logStream.write(`[LOG ${new Date().toISOString()}] ${a.join(' ')}\n`)
+console.error = (...a) => logStream.write(`[ERROR ${new Date().toISOString()}] ${a.join(' ')}\n`)
 
-function launchBackend() {
+function launchBackend () {
   let python, backendScript, cwd
 
-  try {
-    python = ensureVenv()
-  } catch (e) {
-    console.error('[bootstrap] ensureVenv error:', e)
-    throw e
-  }
-
   if (isDev) {
-    python = path.resolve(__dirname, '..', 'backend', 'venv', 'bin', 'python3')
+    python = process.platform === 'win32'
+      ? path.resolve(__dirname, '..', 'backend', 'venv', 'Scripts', 'python.exe')
+      : path.resolve(__dirname, '..', 'backend', 'venv', 'bin', 'python3')
     backendScript = path.resolve(__dirname, '..', 'backend', 'app.py')
-    cwd = path.dirname(backendScript)
     console.log('Launching backend in DEV mode...')
   } else {
+    try {
+      console.log('ENV LOCALAPPDATA =', process.env.LOCALAPPDATA);
+      console.log('app.getPath("appData")', app.getPath('appData'));
+      // console.log('app.getPath("localAppData")', (() => {
+      //   try { return app.getPath('localAppData'); } catch (e) { return String(e); }
+      // })());
+      python = ensureVenv() // создаст venv в профиле пользователя и вернёт путь к интерпретатору
+    } catch (e) {
+      dialog.showErrorBox('Ошибка инициализации Python', e.message);
+      console.error('[bootstrap] ensureVenv error:', e)
+      throw e
+    }
     backendScript = path.join(process.resourcesPath, 'pyapp', 'app.py')
-    cwd = path.dirname(backendScript)
     console.log('Launching backend in PROD mode...')
   }
 
+  cwd = path.dirname(backendScript)
   console.log('Python path:', python)
   console.log('Backend script:', backendScript)
 
+  const detached = process.platform !== 'win32' && !isDev
+
   backendProcess = spawn(python, [backendScript], {
     cwd,
-    detached: !isDev,
+    detached,
     stdio: isDev ? 'inherit' : 'pipe',
     windowsHide: true,
-    env: { ...process.env, PYTHONNOUSERSITE: '1' }
-  })
+    env: {
+      ...process.env,
+      PYTHONNOUSERSITE: '1',
+      APP_DATA_DIR: dataDir,        // <— передаём
+      FLASK_ENV:  'production',
+      FLASK_DEBUG: '0'
+    }
+  });
 
   if (!isDev) {
     backendProcess.stdout?.on('data', d => console.log('[py]', d.toString()))
     backendProcess.stderr?.on('data', d => console.error('[py]', d.toString()))
-    backendProcess.unref()
+    if (detached) backendProcess.unref()
   }
 }
 
-function createWindow() {
+function createWindow () {
   const win = new BrowserWindow({
-    width: 1200,
-    height: 800,
-    webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
-    },
-  });
+    width: 1200, height: 800,
+    webPreferences: { nodeIntegration: true, contextIsolation: false }
+  })
 
-  launchBackend();
+  launchBackend()
 
   if (isDev) {
-    win.loadURL('http://localhost:5173').catch(err => {
-      console.error('Dev load error:', err);
-    });
-    win.webContents.openDevTools();
+    win.loadURL('http://localhost:5173').catch(err => console.error('Dev load error:', err))
+    win.webContents.openDevTools()
   } else {
     const indexPath = path.join(app.getAppPath(), 'dist', 'index.html')
-    win.loadFile(indexPath).then(() => {
-      console.log('Frontend loaded');
-    }).catch(err => {
-      console.error('Failed to load index.html:', err);
-    });
+    console.log('appPath=', app.getAppPath(), 'resourcesPath=', process.resourcesPath, 'index=', indexPath)
+    win.loadFile(indexPath).then(() => console.log('Frontend loaded'))
+      .catch(err => console.error('Failed to load index.html:', err))
   }
 
-  win.on('ready-to-show', () => console.log('Window ready'));
+  win.on('ready-to-show', () => console.log('Window ready'))
   win.webContents.on('did-fail-load', (e, code, desc, url) => {
-    console.error(`Load failed: ${code} - ${desc} @ ${url}`);
-  });
+    console.error(`Load failed: ${code} - ${desc} @ ${url}`)
+  })
 }
 
 app.whenReady().then(() => {
-  console.log('App ready');
-  createWindow();
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
-  });
-});
+  console.log('App ready')
+  createWindow()
+  app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow() })
+})
 
 app.on('window-all-closed', () => {
-  console.log('All windows closed');
-  if (backendProcess && !backendProcess.killed) {
+  console.log('All windows closed')
+  if (backendProcess && typeof backendProcess.pid === 'number') {
     try {
-      process.kill(-backendProcess.pid);
-      console.log('Backend killed');
-    } catch (e) {
-      console.error('Error killing backend:', e);
-    }
+      backendProcess.kill() // Windows: без отрицательных PID
+      console.log('Backend killed')
+    } catch (e) { console.error('Error killing backend:', e) }
   }
-  if (process.platform !== 'darwin') app.quit();
-});
+  if (process.platform !== 'darwin') app.quit()
+})
