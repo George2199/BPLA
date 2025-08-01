@@ -71,6 +71,18 @@ jobs:
           robocopy $src.FullName build\python-win /E
           if ($LASTEXITCODE -ge 8) { exit 1 }
 
+      - name: Cache NPM dependencies
+        uses: actions/cache@v4
+        id: cache-npm
+        with:
+          path: |
+            ~/.npm
+            node_modules
+          key: npm-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            npm-cache-${{ runner.os }}-
+
+
       - name: Install Node deps
         run: npm ci
       
