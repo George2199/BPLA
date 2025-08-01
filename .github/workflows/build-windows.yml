@@ -104,7 +104,7 @@ jobs:
           fi
     
       - name: Build + publish
-        run:
+        run: |
           npx vite build
           npx electron-builder --windows nsis --publish always
         env:
