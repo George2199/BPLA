@@ -82,10 +82,27 @@ jobs:
           restore-keys: |
             npm-cache-${{ runner.os }}-
 
-
       - name: Install Node deps
         run: npm ci
-      
+
+      - name: Check electron modules
+        shell: bash
+        run: |
+          echo "Checking node_modules..."
+          if [ -d "node_modules/electron-updater" ]; then
+            echo "✅ electron-updater is installed"
+          else
+            echo "❌ electron-updater is missing"
+            exit 1
+          fi
+
+          if [ -d "node_modules/electron-log" ]; then
+            echo "✅ electron-log is installed"
+          else
+            echo "❌ electron-log is missing"
+            exit 1
+          fi
+    
       - name: Build + publish
         run: npx electron-builder --windows nsis --publish always
         env:
