@@ -105,7 +105,6 @@ jobs:
     
       - name: Build + publish
         run:
-          npm run clean
           npx vite build
           npx electron-builder --windows nsis --publish always
         env:
