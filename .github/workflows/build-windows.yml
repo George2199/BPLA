@@ -105,7 +105,7 @@ jobs:
     
       - name: Build + publish
         run: |
-          npx vite build
+          npm run build
           npx electron-builder --windows nsis --publish always
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
