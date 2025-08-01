@@ -90,16 +90,16 @@ jobs:
         run: |
           echo "Checking node_modules..."
           if [ -d "node_modules/electron-updater" ]; then
-            echo "✅ electron-updater is installed"
+            echo "electron-updater is installed"
           else
-            echo "❌ electron-updater is missing"
+            echo "electron-updater is missing"
             exit 1
           fi
 
           if [ -d "node_modules/electron-log" ]; then
-            echo "✅ electron-log is installed"
+            echo "electron-log is installed"
           else
-            echo "❌ electron-log is missing"
+            echo "electron-log is missing"
             exit 1
           fi
     
