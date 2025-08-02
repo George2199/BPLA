@@ -139,7 +139,7 @@ function createWindow () {
     win.loadURL('http://localhost:5173').catch(err => console.error('Dev load error:', err))
     win.webContents.openDevTools()
   } else {
-    console.log('appPath=', app.getAppPath(), 'resourcesPath=', process.resourcesPath, 'index=', indexPath)
+    console.log('appPath=', app.getAppPath(), 'resourcesPath=', process.resourcesPath)
     win.loadFile('dist/index.html').then(() => console.log('Frontend loaded'))
       .catch(err => console.error('Failed to load index.html:', err))
   }
