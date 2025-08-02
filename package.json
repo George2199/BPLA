@@ -82,12 +82,10 @@
         }
       ]
     },
-    "asar": false,
+    "asar": true,
     "nsis": {
-      "include": "installer.nsh",
-      "oneClick": false,
-      "allowElevation": true,
-      "allowToChangeInstallationDirectory": true
+      "oneClick": true,
+      "perMachine": false
     },
     "linux": {
       "target": [
@@ -106,7 +104,7 @@
       {
         "provider": "github",
         "publishAutoUpdate": true,
-        "releaseType": "draft"
+        "releaseType": "release"
       }
     ]
   }

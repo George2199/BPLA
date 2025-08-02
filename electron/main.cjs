@@ -19,38 +19,50 @@ function safePath (name) {
 /* --------------------------------------------------------------- */
 
 function initAutoUpdater() {
-  if (isDev) return;                // обновления нужны только в production
+  if (isDev) return;
 
+  const log = require('electron-log');
+  log.transports.file.level = 'info';
   autoUpdater.logger = log;
-  autoUpdater.autoDownload = false; // не качаем в фон без спроса
 
-  autoUpdater.on('update-available', info => {
-    dialog.showMessageBox({
+  autoUpdater.autoDownload = false;      // контроль руками
+  autoUpdater.allowPrerelease = false;   // включите true, если используете -beta.N
+
+  autoUpdater.on('update-available', async (info) => {
+    const { response } = await dialog.showMessageBox({
       type: 'info',
       title: 'Найдена новая версия',
       message: `Доступна ${info.version}. Скачать и установить?`,
-      buttons: ['Да', 'Позже']
-    }).then(({ response }) => {
-      if (response === 0) autoUpdater.downloadUpdate();
+      buttons: ['Да', 'Позже'],
+      cancelId: 1,
+      defaultId: 0,
     });
+    if (response === 0) autoUpdater.downloadUpdate();
   });
 
-  autoUpdater.on('download-progress', p =>
-    log.info(`Скачано ${p.percent.toFixed(1)} %…`)
-  );
+  autoUpdater.on('download-progress', (p) => {
+    log.info(`Download ${p?.percent?.toFixed?.(1) ?? 0}%`);
+  });
 
-  autoUpdater.on('update-downloaded', () => {
-    dialog.showMessageBox({
+  autoUpdater.on('update-downloaded', async () => {
+    const { response } = await dialog.showMessageBox({
       type: 'question',
       buttons: ['Перезапустить', 'Позже'],
       defaultId: 0,
-      message: 'Обновление загружено. Перезапустить сейчас?'
-    }).then(({ response }) => {
-      if (response === 0) autoUpdater.quitAndInstall();
+      message: 'Обновление загружено. Перезапустить сейчас?',
     });
+    if (response === 0) autoUpdater.quitAndInstall();
   });
 
-  autoUpdater.checkForUpdatesAndNotify();    // ← одна строка проверяет всё
+  autoUpdater.on('before-quit-for-update', () => {
+    try { backendProcess?.kill(); } catch (e) { log.error(e); }
+  });
+
+  autoUpdater.on('update-not-available', () => log.info('No updates'));
+  autoUpdater.on('error', (e) => log.error('Updater error:', e));
+
+  // Важно: именно checkForUpdates()
+  autoUpdater.checkForUpdates().catch(err => log.error('Check failed', err));
 }
 
 
