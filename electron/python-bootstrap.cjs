@@ -90,6 +90,16 @@ function cleanupOldVenvs (currentDir) {
 function ensureVenv () {
   const venvDir = venvDirForPlatform();
   const vpy     = venvPython(venvDir);
+  const py      = bundledPython();
+
+  // ← ВСТАВЛЯЕМ СЮДА (до проверки vpy.existsSync)
+  if (!fs.existsSync(py) || !fs.existsSync(path.join(py, '..', '..', 'pyapp', 'app.py'))) {
+    // resources структура нарушена — сбрасываем venv
+    console.warn('[bootstrap] bundled python or pyapp not found — clearing venv:', venvDir);
+    if (fs.existsSync(venvDir)) {
+      try { fs.rmSync(venvDir, { recursive: true, force: true }); } catch {}
+    }
+  }
 
   /* venv уже существует  → выходим */
   if (fs.existsSync(vpy)) {
@@ -102,17 +112,15 @@ function ensureVenv () {
     try { fs.rmSync(venvDir, { recursive: true, force: true }); } catch {}
   }
 
-  const py = bundledPython();
   console.log('[bootstrap] creating venv:', venvDir);
 
   /* создаём виртуальное окружение */
   const createArgs = ['-m', 'venv'];
-  if (process.platform === 'win32') createArgs.push('--copies'); // без symlink
+  if (process.platform === 'win32') createArgs.push('--copies');
   createArgs.push(venvDir);
 
   let r = run(py, createArgs);
   if (r.status !== 0) {
-    /* fallback: без pip */
     const alt = ['-m', 'venv', '--without-pip'];
     if (process.platform === 'win32') alt.push('--copies');
     alt.push(venvDir);
@@ -120,10 +128,8 @@ function ensureVenv () {
     if (r.status !== 0) throw new Error('venv create failed');
   }
 
-  /* пытаемся прокачать pip */
   run(vpy, ['-m', 'ensurepip', '--upgrade']);
 
-  /* офлайн-установка из wheelhouse → при неудаче онлайн */
   const wheelhouse = path.join(process.resourcesPath, 'wheelhouse');
   const req        = path.join(process.resourcesPath, 'pyapp', 'requirements.txt');
   const baseArgs   = ['-m', 'pip', 'install', '--upgrade'];
@@ -141,7 +147,7 @@ function ensureVenv () {
     }
   }
 
-  cleanupOldVenvs(venvDir);        // убираем старые окружения
+  cleanupOldVenvs(venvDir);
   return vpy;
 }
 

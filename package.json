@@ -1,6 +1,6 @@
 {
   "name": "aerocosmos",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "private": true,
   "type": "module",
   "main": "electron/main.cjs",
@@ -84,8 +84,11 @@
     },
     "asar": true,
     "nsis": {
-      "oneClick": true,
-      "perMachine": false
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "selectPerMachineByDefault": true
     },
     "linux": {
       "target": [
