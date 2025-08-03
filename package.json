@@ -87,8 +87,7 @@
       "oneClick": false,
       "perMachine": false,
       "allowElevation": true,
-      "allowToChangeInstallationDirectory": true,
-      "selectPerMachineByDefault": true
+      "allowToChangeInstallationDirectory": true
     },
     "linux": {
       "target": [
